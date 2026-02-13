@@ -31,7 +31,7 @@ public class SecurityConfig {
         )
         .headers(headers -> headers.frameOptions(frame -> frame.disable()))
         .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
-
+    // todo: CORS
     return http.build();
   }
 }
