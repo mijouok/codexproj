@@ -70,11 +70,11 @@ public AuthResponse register(RegisterRequest req) {
   }
 
   public AuthResponse login(LoginRequest req) {
-    User u;
+    User u = null;
     String id = req.getIdentifier().trim();
-    User user = isEmail(id)
-      ? userRepository.findByEmail(id).orElseThrow(new ApiException("BAD_REQUEST", "email is required", HttpStatus.BAD_REQUEST))
-      : userRepository.findByPhone(id).orElseThrow(new ApiException("BAD_REQUEST", "phone is required", HttpStatus.BAD_REQUEST));
+    u = isEmail(id)
+      ? userRepository.findByEmail(id).orElseThrow(() -> new ApiException("BAD_REQUEST", "email is required", HttpStatus.BAD_REQUEST))
+      : userRepository.findByPhone(id).orElseThrow(() -> new ApiException("BAD_REQUEST", "phone is required", HttpStatus.BAD_REQUEST));
 
     if (u.getStatus() == UserStatus.BANNED) {
       throw new ApiException("BANNED", "User is banned", HttpStatus.FORBIDDEN);
