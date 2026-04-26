@@ -20,32 +20,32 @@ public class SpaceController {
   @PostMapping
   @PreAuthorize("hasRole('platform_admin')")
   public SpaceResponse createSpace(@Valid @RequestBody CreateSpaceRequest req) {
-    long uid = SecurityUtil.requireCurrentUser().userId();
+    String uid = SecurityUtil.requireCurrentUser().userId();
     return spaceService.createSpace(req, uid);
   }
 
   @GetMapping("/{id}")
-  public SpaceResponse getSpace(@PathVariable long id) {
-    long uid = SecurityUtil.requireCurrentUser().userId();
+  public SpaceResponse getSpace(@PathVariable String id) {
+    String uid = SecurityUtil.requireCurrentUser().userId();
     return spaceService.getSpace(id, uid);
   }
 
   @PostMapping("/{id}/invite-codes")
-  public InviteCodeResponse createInvite(@PathVariable long id, @Valid @RequestBody CreateInviteCodeRequest req) {
-    long uid = SecurityUtil.requireCurrentUser().userId();
+  public InviteCodeResponse createInvite(@PathVariable String id, @Valid @RequestBody CreateInviteCodeRequest req) {
+    String uid = SecurityUtil.requireCurrentUser().userId();
     String code = spaceService.createInviteCode(id, req, uid);
     return new InviteCodeResponse(code);
   }
 
   @PostMapping("/join-by-code")
   public MembershipResponse joinByCode(@Valid @RequestBody JoinByCodeRequest req) {
-    long uid = SecurityUtil.requireCurrentUser().userId();
+    String uid = SecurityUtil.requireCurrentUser().userId();
     return spaceService.joinByCode(req.getCode(), uid);
   }
 
   @GetMapping("/{id}/members/me")
-  public MembershipResponse myMembership(@PathVariable long id) {
-    long uid = SecurityUtil.requireCurrentUser().userId();
+  public MembershipResponse myMembership(@PathVariable String id) {
+    String uid = SecurityUtil.requireCurrentUser().userId();
     return spaceService.myMembership(id, uid);
   }
 }

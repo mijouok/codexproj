@@ -35,8 +35,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function register(identifier: string, nickname: string, password: string) {
     const res = await authApi.register({ identifier, nickname, password });
-    tokenStorage.setAccessToken(res.access_token);
-    tokenStorage.setRefreshToken(res.refresh_token);
+    tokenStorage.setAccessToken(res.accessToken);
+    tokenStorage.setRefreshToken(res.refreshToken);
     await loadMe();
   }
 

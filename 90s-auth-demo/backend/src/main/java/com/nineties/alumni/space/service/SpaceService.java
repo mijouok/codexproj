@@ -36,7 +36,7 @@ public class SpaceService {
     this.roleService = roleService;
   }
 
-  public SpaceResponse createSpace(CreateSpaceRequest req, long creatorUserId) {
+  public SpaceResponse createSpace(CreateSpaceRequest req, String creatorUserId) {
     if (spaceRepository.findBySlug(req.getSlug()).isPresent()) {
       throw new ApiException("SPACE_SLUG_TAKEN", "Space slug already exists", HttpStatus.CONFLICT);
     }
@@ -63,7 +63,7 @@ public class SpaceService {
     return new SpaceResponse(saved.getId(), saved.getName(), saved.getSlug());
   }
 
-  public String createInviteCode(long spaceId, CreateInviteCodeRequest req, long requesterUserId) {
+  public String createInviteCode(String spaceId, CreateInviteCodeRequest req, String requesterUserId) {
     requireActiveMember(spaceId, requesterUserId);
 
     SpaceInviteCode code = new SpaceInviteCode();
@@ -78,7 +78,7 @@ public class SpaceService {
     return code.getCode();
   }
 
-  public MembershipResponse joinByCode(String codeStr, long userId) {
+  public MembershipResponse joinByCode(String codeStr, String userId) {
     SpaceInviteCode code = inviteCodeRepository.findByCode(codeStr)
         .orElseThrow(() -> new ApiException("INVITE_NOT_FOUND", "Invalid invite code", HttpStatus.NOT_FOUND));
 
@@ -90,7 +90,7 @@ public class SpaceService {
       throw new ApiException("INVITE_EXHAUSTED", "Invite code is used up", HttpStatus.BAD_REQUEST);
     }
 
-    Long spaceId = code.getSpaceId();
+    String spaceId = code.getSpaceId();
 
     Membership existing = membershipRepository.findBySpaceIdAndUserId(spaceId, userId).orElse(null);
     if (existing != null) {
@@ -114,19 +114,19 @@ public class SpaceService {
     return new MembershipResponse(spaceId, userId, m.getMembershipStatus().name());
   }
 
-  public SpaceResponse getSpace(long spaceId, long userId) {
+  public SpaceResponse getSpace(String spaceId, String userId) {
     requireActiveMember(spaceId, userId);
     Space s = spaceRepository.findById(spaceId)
         .orElseThrow(() -> new ApiException("SPACE_NOT_FOUND", "Space not found", HttpStatus.NOT_FOUND));
     return new SpaceResponse(s.getId(), s.getName(), s.getSlug());
   }
 
-  public MembershipResponse myMembership(long spaceId, long userId) {
+  public MembershipResponse myMembership(String spaceId, String userId) {
     Membership m = requireActiveMember(spaceId, userId);
     return new MembershipResponse(spaceId, userId, m.getMembershipStatus().name());
   }
 
-  private Membership requireActiveMember(long spaceId, long userId) {
+  private Membership requireActiveMember(String spaceId, String userId) {
     Membership m = membershipRepository.findBySpaceIdAndUserId(spaceId, userId)
         .orElseThrow(() -> new ApiException("NOT_A_MEMBER", "You are not a member of this space", HttpStatus.FORBIDDEN));
     if (m.getMembershipStatus() != MembershipStatus.ACTIVE) {

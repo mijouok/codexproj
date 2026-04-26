@@ -1,32 +1,28 @@
 package com.nineties.alumni.auth.model;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
-@Entity
-@Table(name = "user_roles", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"userId", "roleId", "scopeType", "scopeId"})
-})
+@Document("user_roles")
+@CompoundIndex(name = "uk_user_roles_assignment", def = "{'userId': 1, 'roleId': 1, 'scopeType': 1, 'scopeId': 1}", unique = true)
 @Getter
 @Setter
 public class UserRole {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private String id;
 
-  @Column(nullable = false)
-  private Long userId;
+  private String userId;
 
-  @Column(nullable = false)
-  private Long roleId;
+  private String roleId;
 
-  @Column(nullable = false)
   private String scopeType; // PLATFORM or SPACE
 
-  private Long scopeId; // null for PLATFORM
+  private String scopeId; // null for PLATFORM
 
   private Instant createdAt = Instant.now();
 }

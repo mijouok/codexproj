@@ -51,9 +51,8 @@ private boolean isEmail(String s) {
   return s != null && s.contains("@");
 }
 
-public AuthResponse register(RegisterRequest req) {
-   String id = req.getIdentifier().trim();
-  //  User user = isEmail(id);
+  public AuthResponse register(RegisterRequest req) {
+    String id = req.getIdentifier().trim();
     User u = new User();
     u.setEmail(isEmail(id) ? id : null);
     u.setPhone(!isEmail(id) ? id : null);
@@ -61,6 +60,8 @@ public AuthResponse register(RegisterRequest req) {
     u.setPasswordHash(passwordEncoder.encode(req.getPassword()));
     u.setStatus(UserStatus.ACTIVE);
     u.setTrustLevel(0);
+    u.setCreatedAt(Instant.now());
+    u.setUpdatedAt(Instant.now());
     userRepository.save(u);
 
     // Default role: member (platform scope)
@@ -82,6 +83,7 @@ public AuthResponse register(RegisterRequest req) {
     if (!passwordEncoder.matches(req.getPassword(), u.getPasswordHash())) {
       throw new ApiException("INVALID_CREDENTIALS", "Invalid credentials", HttpStatus.UNAUTHORIZED);
     }
+    u.setUpdatedAt(Instant.now());
     u.setLastLoginAt(Instant.now());
     userRepository.save(u);
     return issueTokens(u);
@@ -128,6 +130,7 @@ public AuthResponse register(RegisterRequest req) {
     rt.setUserId(u.getId());
     rt.setTokenHash(CryptoUtil.sha256Hex(refresh));
     rt.setExpiresAt(Instant.now().plusSeconds(jwtProperties.getRefreshTokenDays() * 86400L));
+    rt.setCreatedAt(Instant.now());
     refreshTokenRepository.save(rt);
 
     return new AuthResponse(access, refresh, u.getId(), u.getTrustLevel(), roles);
@@ -139,9 +142,4 @@ public AuthResponse register(RegisterRequest req) {
     return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
   }
 
-  private String blankToNull(String s) {
-    if (s == null) return null;
-    String t = s.trim();
-    return t.isEmpty() ? null : t;
-  }
 }

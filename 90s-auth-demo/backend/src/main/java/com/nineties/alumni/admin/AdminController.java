@@ -27,17 +27,19 @@ public class AdminController {
   }
 
   @PostMapping("/users/{id}/ban")
-  public User ban(@PathVariable Long id) {
+  public User ban(@PathVariable String id) {
     User u = userRepository.findById(id)
         .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
+    u.setUpdatedAt(java.time.Instant.now());
     u.setStatus(UserStatus.BANNED);
     return userRepository.save(u);
   }
 
   @PostMapping("/users/{id}/unban")
-  public User unban(@PathVariable Long id) {
+  public User unban(@PathVariable String id) {
     User u = userRepository.findById(id)
         .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
+    u.setUpdatedAt(java.time.Instant.now());
     u.setStatus(UserStatus.ACTIVE);
     return userRepository.save(u);
   }

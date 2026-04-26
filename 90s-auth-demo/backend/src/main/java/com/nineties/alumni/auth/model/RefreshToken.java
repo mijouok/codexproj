@@ -1,29 +1,28 @@
 package com.nineties.alumni.auth.model;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
-@Entity
-@Table(name = "refresh_tokens")
+@Document("refresh_tokens")
 @Getter
 @Setter
 public class RefreshToken {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private String id;
 
-  @Column(nullable = false)
-  private Long userId;
+  @Indexed
+  private String userId;
 
-  @Column(nullable = false, length = 256)
+  @Indexed(unique = true)
   private String tokenHash;
 
   private String deviceId;
 
-  @Column(nullable = false)
   private Instant expiresAt;
 
   private Instant revokedAt;

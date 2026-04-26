@@ -24,7 +24,7 @@ public class RoleService {
     return roleRepository.findByName(name).orElseThrow(() -> new IllegalStateException("Missing role: " + name));
   }
 
-  public void assignPlatformRole(Long userId, String roleName) {
+  public void assignPlatformRole(String userId, String roleName) {
     Role role = requireRole(roleName);
     UserRole ur = new UserRole();
     ur.setUserId(userId);
@@ -34,7 +34,7 @@ public class RoleService {
     userRoleRepository.save(ur);
   }
 
-  public void assignSpaceRole(Long userId, Long spaceId, String roleName) {
+  public void assignSpaceRole(String userId, String spaceId, String roleName) {
     Role role = requireRole(roleName);
     UserRole ur = new UserRole();
     ur.setUserId(userId);
@@ -44,7 +44,7 @@ public class RoleService {
     userRoleRepository.save(ur);
   }
 
-  public List<String> listPlatformRoleNames(Long userId) {
+  public List<String> listPlatformRoleNames(String userId) {
     List<UserRole> urs = userRoleRepository.findByUserIdAndScopeType(userId, "PLATFORM");
     List<String> names = new ArrayList<>();
     for (UserRole ur : urs) {

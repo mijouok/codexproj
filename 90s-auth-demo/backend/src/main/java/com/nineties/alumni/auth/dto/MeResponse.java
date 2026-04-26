@@ -3,14 +3,14 @@ package com.nineties.alumni.auth.dto;
 import java.util.List;
 
 public class MeResponse {
-  private long userId;
+  private String userId;
   private String nickname;
   private String email;
   private String phone;
   private int trustLevel;
   private List<String> roles;
 
-  public MeResponse(long userId, String nickname, String email, String phone, int trustLevel, List<String> roles) {
+  public MeResponse(String userId, String nickname, String email, String phone, int trustLevel, List<String> roles) {
     this.userId = userId;
     this.nickname = nickname;
     this.email = email;
@@ -19,7 +19,7 @@ public class MeResponse {
     this.roles = roles;
   }
 
-  public long getUserId() { return userId; }
+  public String getUserId() { return userId; }
   public String getNickname() { return nickname; }
   public String getEmail() { return email; }
   public String getPhone() { return phone; }

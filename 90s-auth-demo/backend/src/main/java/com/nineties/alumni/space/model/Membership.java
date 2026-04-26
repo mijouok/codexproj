@@ -1,28 +1,25 @@
 package com.nineties.alumni.space.model;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
-@Entity
-@Table(name = "memberships", uniqueConstraints = @UniqueConstraint(columnNames = {"spaceId", "userId"}))
+@Document("memberships")
+@CompoundIndex(name = "uk_membership_space_user", def = "{'spaceId': 1, 'userId': 1}", unique = true)
 @Getter
 @Setter
 public class Membership {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private String id;
 
-  @Column(nullable = false)
-  private Long spaceId;
+  private String spaceId;
 
-  @Column(nullable = false)
-  private Long userId;
+  private String userId;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
   private MembershipStatus membershipStatus = MembershipStatus.ACTIVE;
 
   private String displayName;
