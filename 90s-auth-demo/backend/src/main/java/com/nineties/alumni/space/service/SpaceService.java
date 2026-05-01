@@ -65,12 +65,18 @@ public class SpaceService {
 
   public String createInviteCode(long spaceId, CreateInviteCodeRequest req, long requesterUserId) {
     requireActiveMember(spaceId, requesterUserId);
+    InviteCodeType inviteCodeType;
+    try {
+      inviteCodeType = InviteCodeType.valueOf(req.getType());
+    } catch (IllegalArgumentException ex) {
+      throw new ApiException("INVALID_INVITE_TYPE", "Invite code type is invalid", HttpStatus.BAD_REQUEST);
+    }
 
     SpaceInviteCode code = new SpaceInviteCode();
     code.setSpaceId(spaceId);
     code.setCode(generateCode());
     code.setCreatedBy(requesterUserId);
-    code.setType(InviteCodeType.valueOf(req.getType()));
+    code.setType(inviteCodeType);
     code.setMaxUses(req.getMaxUses() == null ? 50 : req.getMaxUses());
     int days = req.getExpiresInDays() == null ? 30 : req.getExpiresInDays();
     code.setExpiresAt(Instant.now().plusSeconds(days * 86400L));

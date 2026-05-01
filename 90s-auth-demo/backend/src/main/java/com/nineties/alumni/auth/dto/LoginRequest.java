@@ -3,6 +3,7 @@ package com.nineties.alumni.auth.dto;
 import jakarta.validation.constraints.NotBlank;
 
 public class LoginRequest {
+  @NotBlank
   private String identifier;
   private String email;
   private String phone;

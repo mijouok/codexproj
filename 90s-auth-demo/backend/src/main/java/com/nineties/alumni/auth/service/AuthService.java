@@ -52,8 +52,10 @@ private boolean isEmail(String s) {
 }
 
 public AuthResponse register(RegisterRequest req) {
-   String id = req.getIdentifier().trim();
-  //  User user = isEmail(id);
+    String id = req.getIdentifier().trim();
+    if (isEmail(id) ? userRepository.existsByEmail(id) : userRepository.existsByPhone(id)) {
+      throw new ApiException("DUPLICATE_IDENTIFIER", "Identifier already exists", HttpStatus.CONFLICT);
+    }
     User u = new User();
     u.setEmail(isEmail(id) ? id : null);
     u.setPhone(!isEmail(id) ? id : null);
@@ -70,11 +72,10 @@ public AuthResponse register(RegisterRequest req) {
   }
 
   public AuthResponse login(LoginRequest req) {
-    User u = null;
     String id = req.getIdentifier().trim();
-    u = isEmail(id)
-      ? userRepository.findByEmail(id).orElseThrow(() -> new ApiException("BAD_REQUEST", "email is required", HttpStatus.BAD_REQUEST))
-      : userRepository.findByPhone(id).orElseThrow(() -> new ApiException("BAD_REQUEST", "phone is required", HttpStatus.BAD_REQUEST));
+    User u = isEmail(id)
+        ? userRepository.findByEmail(id).orElseThrow(() -> invalidCredentials())
+        : userRepository.findByPhone(id).orElseThrow(() -> invalidCredentials());
 
     if (u.getStatus() == UserStatus.BANNED) {
       throw new ApiException("BANNED", "User is banned", HttpStatus.FORBIDDEN);
@@ -139,9 +140,7 @@ public AuthResponse register(RegisterRequest req) {
     return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
   }
 
-  private String blankToNull(String s) {
-    if (s == null) return null;
-    String t = s.trim();
-    return t.isEmpty() ? null : t;
+  private ApiException invalidCredentials() {
+    return new ApiException("INVALID_CREDENTIALS", "Invalid credentials", HttpStatus.UNAUTHORIZED);
   }
 }
