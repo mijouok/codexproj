@@ -38,7 +38,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       Map<String, Object> claims = jwtService.parseClaims(token);
       Object sub = claims.get("sub");
       if (sub == null) throw new IllegalArgumentException("missing sub");
-      long userId = Long.parseLong(sub.toString());
+      String userId = sub.toString();
 
       int tl = 0;
       Object tlObj = claims.get("tl");

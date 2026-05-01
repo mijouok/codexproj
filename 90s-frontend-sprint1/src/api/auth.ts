@@ -1,5 +1,6 @@
 import { http } from "./http";
 import type { LoginReq, RegisterReq, MeResponse, TokenPair } from "./types";
+import {tokenStorage} from "../utils/storage";
 
 export const authApi = {
   login: async (req: LoginReq): Promise<TokenPair> => {
@@ -14,7 +15,13 @@ export const authApi = {
     await http.post("/api/auth/logout", {});
   },
   me: async (): Promise<MeResponse> => {
-    const { data } = await http.get("/api/auth/me");
+    const token = tokenStorage.getAccessToken();
+    //console.log("token Get is :" + token);
+    const { data } = await http.get("/api/auth/me", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     return data;
   }
 };

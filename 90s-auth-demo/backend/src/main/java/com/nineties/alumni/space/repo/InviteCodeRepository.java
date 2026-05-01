@@ -1,10 +1,10 @@
 package com.nineties.alumni.space.repo;
 
 import com.nineties.alumni.space.model.SpaceInviteCode;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface InviteCodeRepository extends JpaRepository<SpaceInviteCode, Long> {
+public interface InviteCodeRepository extends MongoRepository<SpaceInviteCode, String> {
   Optional<SpaceInviteCode> findByCode(String code);
 }

@@ -29,7 +29,7 @@ public class JwtService {
     return padded;
   }
 
-  public String createAccessToken(long userId, int trustLevel, List<String> roles) {
+  public String createAccessToken(String userId, int trustLevel, List<String> roles) {
     Instant now = Instant.now();
     Instant exp = now.plusSeconds(props.getAccessTokenMinutes() * 60L);
     return Jwts.builder()

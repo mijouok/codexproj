@@ -2,6 +2,7 @@ package com.nineties.alumni;
 
 import com.nineties.alumni.auth.model.Role;
 import com.nineties.alumni.auth.model.User;
+import com.nineties.alumni.auth.model.UserStatus;
 import com.nineties.alumni.auth.repo.RoleRepository;
 import com.nineties.alumni.auth.repo.UserRepository;
 import com.nineties.alumni.auth.service.RoleNames;
@@ -33,6 +34,7 @@ public class DataInitializer {
         u.setEmail(adminEmail);
         u.setNickname("Platform Admin");
         u.setPasswordHash(passwordEncoder.encode("Admin123!"));
+        u.setStatus(UserStatus.ACTIVE);
         userRepository.save(u);
         roleService.assignPlatformRole(u.getId(), RoleNames.PLATFORM_ADMIN);
       }

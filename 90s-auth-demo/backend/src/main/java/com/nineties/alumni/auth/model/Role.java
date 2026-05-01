@@ -1,18 +1,18 @@
 package com.nineties.alumni.auth.model;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "roles")
+@Document("roles")
 @Getter
 @Setter
 public class Role {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private String id;
 
-  @Column(nullable = false, unique = true)
+  @Indexed(unique = true)
   private String name;
 }
