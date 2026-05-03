@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../store/authStore";
 
@@ -16,7 +16,9 @@ export default function AuthPage() {
   useEffect(() => {
     (async () => {
       if (isAuthed && !me) {
-        try { await loadMe(); } catch {}
+        try {
+          await loadMe();
+        } catch {}
       }
       if (isAuthed && me) {
         nav((me.spaces?.length ?? 0) > 0 ? "/me" : "/join", { replace: true });
@@ -32,8 +34,7 @@ export default function AuthPage() {
       if (mode === "login") await login(identifier, password);
       else await register(identifier, nickname, password);
 
-      // login/register 已 loadMe，这里用最新 me（若想更严谨可再 await loadMe()）
-      const spaces = (me?.spaces?.length ?? 0);
+      const spaces = me?.spaces?.length ?? 0;
       nav(spaces > 0 ? "/me" : "/join", { replace: true });
     } catch (e: any) {
       setErr(e?.response?.data?.message || e?.message || "Auth failed");
@@ -43,47 +44,93 @@ export default function AuthPage() {
   }
 
   return (
-    <div style={{ maxWidth: 420, margin: "60px auto", padding: 24, fontFamily: "system-ui" }}>
-      <h2 style={{ marginBottom: 8 }}>90’s 校友网</h2>
-      <div style={{ opacity: 0.7, marginBottom: 16 }}>Sprint 1 最小认证 Demo</div>
+    <div className="x-page">
+      <header className="x-topbar">
+        <div className="x-topbar-inner">
+          <div className="x-brand">校内网 90's Demo</div>
+          <div className="x-topbar-note">欢迎回来，同学</div>
+        </div>
+      </header>
 
-      <div style={{ display: "flex", gap: 8, margin: "12px 0" }}>
-        <button onClick={() => setMode("login")} disabled={mode === "login"}>登录</button>
-        <button onClick={() => setMode("register")} disabled={mode === "register"}>注册</button>
-      </div>
+      <main className="x-main">
+        <div className="x-layout-2col">
+          <section className="x-card">
+            <div className="x-card-header">账号登录</div>
+            <div className="x-card-body">
+              <div className="x-tabs">
+                <button
+                  className={`x-tab ${mode === "login" ? "x-tab-active" : ""}`}
+                  onClick={() => setMode("login")}
+                  disabled={mode === "login"}
+                >
+                  登录
+                </button>
+                <button
+                  className={`x-tab ${mode === "register" ? "x-tab-active" : ""}`}
+                  onClick={() => setMode("register")}
+                  disabled={mode === "register"}
+                >
+                  注册
+                </button>
+              </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <input
-          placeholder="邮箱或手机号"
-          value={identifier}
-          onChange={(e) => setIdentifier(e.target.value)}
-        />
+              <div className="x-form">
+                <label>
+                  <span className="x-label">邮箱或手机号</span>
+                  <input
+                    className="x-input"
+                    placeholder="输入邮箱或手机号"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                  />
+                </label>
 
-        {mode === "register" && (
-          <input
-            placeholder="昵称"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-          />
-        )}
+                {mode === "register" && (
+                  <label>
+                    <span className="x-label">昵称</span>
+                    <input
+                      className="x-input"
+                      placeholder="你的校园昵称"
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                    />
+                  </label>
+                )}
 
-        <input
-          placeholder="密码"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+                <label>
+                  <span className="x-label">密码</span>
+                  <input
+                    className="x-input"
+                    placeholder="输入密码"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </label>
 
-        {err && <div style={{ color: "crimson" }}>{err}</div>}
+                {err && <div className="x-error">{err}</div>}
 
-        <button onClick={onSubmit} disabled={busy}>
-          {busy ? "处理中..." : (mode === "login" ? "登录" : "注册")}
-        </button>
-      </div>
+                <button className="x-btn" onClick={onSubmit} disabled={busy}>
+                  {busy ? "处理中..." : mode === "login" ? "立即登录" : "立即注册"}
+                </button>
+              </div>
+            </div>
+          </section>
 
-      <div style={{ marginTop: 14, opacity: 0.7, fontSize: 12 }}>
-        * Demo: refresh_token 存 localStorage，生产环境建议 httpOnly cookie
-      </div>
+          <aside className="x-card">
+            <div className="x-card-header">新鲜事</div>
+            <div className="x-card-body x-muted">
+              <p style={{ marginTop: 0 }}>
+                这是 Sprint 1 的最小认证演示，页面样式参考了早期校内网的蓝白校园风格。
+              </p>
+              <p>你可以先登录，再加入一个 Cohort Space。</p>
+              <p style={{ marginBottom: 0, fontSize: 12 }}>
+                Demo 提示：refresh token 仅保存在 localStorage。
+              </p>
+            </div>
+          </aside>
+        </div>
+      </main>
     </div>
   );
 }
