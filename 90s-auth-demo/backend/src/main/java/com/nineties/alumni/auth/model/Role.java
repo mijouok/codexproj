@@ -13,6 +13,6 @@ public class Role {
   @Id
   private String id;
 
-  @Indexed(unique = true)
+  @Indexed(name = "name_1", unique = true)
   private String name;
 }

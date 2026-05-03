@@ -63,38 +63,49 @@ function migrateConflictingIndex(collection, keySpec, canonicalOptions) {
   }
 }
 
-db.users.createIndex(
+function ensureCanonicalIndex(collection, keySpec, options) {
+  migrateConflictingIndex(collection, keySpec, options);
+  collection.createIndex(keySpec, options);
+}
+
+ensureCanonicalIndex(
+  db.users,
   { email: 1 },
   { name: "email_1", unique: true, sparse: true }
 );
-db.users.createIndex(
+ensureCanonicalIndex(
+  db.users,
   { phone: 1 },
   { name: "phone_1", unique: true, sparse: true }
 );
 
-db.roles.createIndex({ name: 1 }, { name: "name_1", unique: true });
+ensureCanonicalIndex(db.roles, { name: 1 }, { name: "name_1", unique: true });
 
-db.user_roles.createIndex(
+ensureCanonicalIndex(
+  db.user_roles,
   { userId: 1, roleId: 1, scopeType: 1, scopeId: 1 },
   { name: "uk_user_roles_assignment", unique: true }
 );
 
-db.refresh_tokens.createIndex({ userId: 1 }, { name: "userId_1" });
-db.refresh_tokens.createIndex(
+ensureCanonicalIndex(db.refresh_tokens, { userId: 1 }, { name: "userId_1" });
+ensureCanonicalIndex(
+  db.refresh_tokens,
   { tokenHash: 1 },
   { name: "tokenHash_1", unique: true }
 );
 
-db.spaces.createIndex({ slug: 1 }, { name: "slug_1", unique: true });
+ensureCanonicalIndex(db.spaces, { slug: 1 }, { name: "slug_1", unique: true });
 
-db.memberships.createIndex(
+ensureCanonicalIndex(
+  db.memberships,
   { spaceId: 1, userId: 1 },
   { name: "uk_membership_space_user", unique: true }
 );
 
-const inviteCodeIndexKey = { code: 1 };
-const inviteCodeIndexOptions = { name: "code_1", unique: true };
-migrateConflictingIndex(db.space_invite_codes, inviteCodeIndexKey, inviteCodeIndexOptions);
-db.space_invite_codes.createIndex(inviteCodeIndexKey, inviteCodeIndexOptions);
+ensureCanonicalIndex(
+  db.space_invite_codes,
+  { code: 1 },
+  { name: "code_1", unique: true }
+);
 
 print("MongoDB schema initialization completed.");

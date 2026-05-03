@@ -15,10 +15,10 @@ public class User {
   @Id
   private String id;
 
-  @Indexed(unique = true, sparse = true)
+  @Indexed(name = "email_1", unique = true, sparse = true)
   private String email;
 
-  @Indexed(unique = true, sparse = true)
+  @Indexed(name = "phone_1", unique = true, sparse = true)
   private String phone;
 
   private String passwordHash;
