@@ -17,7 +17,7 @@ public class SpaceInviteCode {
 
   private String spaceId;
 
-  @Indexed(unique = true)
+  @Indexed(name = "code_1", unique = true)
   private String code;
 
   private InviteCodeType type = InviteCodeType.MULTI_USE;
