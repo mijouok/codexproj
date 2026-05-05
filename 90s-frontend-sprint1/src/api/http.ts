@@ -1,7 +1,8 @@
 import axios from "axios";
 import { tokenStorage } from "../utils/storage";
+import type { TokenPair } from "./types";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export const http = axios.create({
   baseURL: BASE_URL,
@@ -26,10 +27,13 @@ async function refreshAccessToken(): Promise<string> {
     { headers: { "Content-Type": "application/json" } }
   );
 
-  const { access_token, refresh_token } = res.data;
-  tokenStorage.setAccessToken(access_token);
-  tokenStorage.setRefreshToken(refresh_token);
-  return access_token;
+  const data = res.data as TokenPair;
+  const access = data.access_token || data.accessToken || "";
+  const refresh = data.refresh_token || data.refreshToken || "";
+  if (!access) throw new Error("No access token in refresh response");
+  tokenStorage.setAccessToken(access);
+  tokenStorage.setRefreshToken(refresh);
+  return access;
 }
 
 http.interceptors.response.use(

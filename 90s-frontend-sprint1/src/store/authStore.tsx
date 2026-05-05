@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "../api/auth";
 import { tokenStorage } from "../utils/storage";
-import type { MeResponse } from "../api/types";
+import type { MeResponse, TokenPair } from "../api/types";
 
 type AuthContextType = {
   me: MeResponse | null;
@@ -14,6 +14,12 @@ type AuthContextType = {
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
+function pickTokens(res: TokenPair) {
+  const access = res.access_token || res.accessToken || "";
+  const refresh = res.refresh_token || res.refreshToken || "";
+  return { access, refresh };
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [me, setMe] = useState<MeResponse | null>(null);
@@ -28,15 +34,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function login(identifier: string, password: string) {
     const res = await authApi.login({ identifier, password });
-    tokenStorage.setAccessToken(res.access_token);
-    tokenStorage.setRefreshToken(res.refresh_token);
+    const { access, refresh } = pickTokens(res);
+    if (!access) throw new Error("No access token in login response");
+    tokenStorage.setAccessToken(access);
+    tokenStorage.setRefreshToken(refresh);
     await loadMe();
   }
 
   async function register(identifier: string, nickname: string, password: string) {
     const res = await authApi.register({ identifier, nickname, password });
-    tokenStorage.setAccessToken(res.access_token);
-    tokenStorage.setRefreshToken(res.refresh_token);
+    const { access, refresh } = pickTokens(res);
+    if (!access) throw new Error("No access token in register response");
+    tokenStorage.setAccessToken(access);
+    tokenStorage.setRefreshToken(refresh);
     await loadMe();
   }
 

@@ -24,12 +24,32 @@ function clearCookie(name: string) {
 }
 
 export const tokenStorage = {
-  getAccessToken: () => getCookie(ACCESS),
-  getRefreshToken: () => getCookie(REFRESH),
-  setAccessToken: (t: string) => setCookie(ACCESS, t),
-  setRefreshToken: (t: string) => setCookie(REFRESH, t),
+  getAccessToken: () => {
+    const fromCookie = getCookie(ACCESS);
+    const fromLocal = localStorage.getItem(ACCESS) || "";
+    const value = fromCookie || fromLocal;
+    return value && value !== "undefined" && value !== "null" ? value : "";
+  },
+  getRefreshToken: () => {
+    const fromCookie = getCookie(REFRESH);
+    const fromLocal = localStorage.getItem(REFRESH) || "";
+    const value = fromCookie || fromLocal;
+    return value && value !== "undefined" && value !== "null" ? value : "";
+  },
+  setAccessToken: (t: string) => {
+    if (!t) return;
+    setCookie(ACCESS, t);
+    localStorage.setItem(ACCESS, t);
+  },
+  setRefreshToken: (t: string) => {
+    if (!t) return;
+    setCookie(REFRESH, t);
+    localStorage.setItem(REFRESH, t);
+  },
   clear: () => {
     clearCookie(ACCESS);
     clearCookie(REFRESH);
+    localStorage.removeItem(ACCESS);
+    localStorage.removeItem(REFRESH);
   }
 };
