@@ -12,8 +12,7 @@ export default function MePage() {
 
   useEffect(() => {
     loadMe().catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadMe]);
 
   if (!me) return <div className="x-loading">Loading...</div>;
 

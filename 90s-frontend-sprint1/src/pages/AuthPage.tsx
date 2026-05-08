@@ -24,8 +24,7 @@ export default function AuthPage() {
         nav((me.spaces?.length ?? 0) > 0 ? "/me" : "/join", { replace: true });
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthed, me]);
+  }, [isAuthed, loadMe, me, nav]);
 
   async function onSubmit() {
     setErr("");

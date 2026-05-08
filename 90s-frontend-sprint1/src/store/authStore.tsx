@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "../api/auth";
 import { tokenStorage } from "../utils/storage";
 import type { MeResponse, TokenPair } from "../api/types";
@@ -27,53 +27,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isAuthed = !!tokenStorage.getAccessToken();
 
-  async function loadMe() {
+  const loadMe = useCallback(async () => {
     const data = await authApi.me();
     setMe(data);
-  }
+  }, []);
 
-  async function login(identifier: string, password: string) {
+  const login = useCallback(async (identifier: string, password: string) => {
     const res = await authApi.login({ identifier, password });
     const { access, refresh } = pickTokens(res);
     if (!access) throw new Error("No access token in login response");
     tokenStorage.setAccessToken(access);
     tokenStorage.setRefreshToken(refresh);
     await loadMe();
-  }
+  }, [loadMe]);
 
-  async function register(identifier: string, nickname: string, password: string) {
+  const register = useCallback(async (identifier: string, nickname: string, password: string) => {
     const res = await authApi.register({ identifier, nickname, password });
     const { access, refresh } = pickTokens(res);
     if (!access) throw new Error("No access token in register response");
     tokenStorage.setAccessToken(access);
     tokenStorage.setRefreshToken(refresh);
     await loadMe();
-  }
+  }, [loadMe]);
 
-  async function logout() {
+  const logout = useCallback(async () => {
     try {
       await authApi.logout();
     } finally {
       tokenStorage.clear();
       setMe(null);
     }
-  }
+  }, []);
 
   useEffect(() => {
+    let active = true;
+
     (async () => {
       try {
         if (tokenStorage.getAccessToken()) {
           await loadMe();
         }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     })();
-  }, []);
+
+    return () => {
+      active = false;
+    };
+  }, [loadMe]);
 
   const value = useMemo(
     () => ({ me, isAuthed, loading, loadMe, login, register, logout }),
-    [me, isAuthed, loading]
+    [me, isAuthed, loading, loadMe, login, register, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
