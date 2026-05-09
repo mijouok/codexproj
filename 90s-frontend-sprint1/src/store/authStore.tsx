@@ -67,6 +67,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (tokenStorage.getAccessToken()) {
           await loadMe();
         }
+      } catch {
+        tokenStorage.clear();
+        setMe(null);
       } finally {
         if (active) {
           setLoading(false);

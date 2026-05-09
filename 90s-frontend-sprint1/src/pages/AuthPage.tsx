@@ -21,7 +21,8 @@ export default function AuthPage() {
         } catch {}
       }
       if (isAuthed && me) {
-        nav((me.spaces?.length ?? 0) > 0 ? "/me" : "/join", { replace: true });
+        // Invite-code flow is disabled, so signed-in users go straight to the profile page.
+        nav("/me", { replace: true });
       }
     })();
   }, [isAuthed, loadMe, me, nav]);
@@ -33,8 +34,8 @@ export default function AuthPage() {
       if (mode === "login") await login(identifier, password);
       else await register(identifier, nickname, password);
 
-      const spaces = me?.spaces?.length ?? 0;
-      nav(spaces > 0 ? "/me" : "/join", { replace: true });
+      // Invite-code flow is disabled, so new sessions do not stop at /join.
+      nav("/me", { replace: true });
     } catch (e: any) {
       setErr(e?.response?.data?.message || e?.message || "Auth failed");
     } finally {
