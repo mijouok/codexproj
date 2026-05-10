@@ -19,7 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [me, setMe] = useState<MeResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const isAuthed = !!tokenStorage.getAccessToken();
+  const isAuthed = !!tokenStorage.getAccessToken();//
 
   async function loadMe() {
     const data = await authApi.me();
