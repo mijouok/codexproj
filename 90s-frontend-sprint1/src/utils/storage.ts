@@ -1,12 +1,54 @@
 const ACCESS = "90s_access_token";
 const REFRESH = "90s_refresh_token";
 
+function getCookie(name: string): string {
+  const target = `${encodeURIComponent(name)}=`;
+  const matched = document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(target));
+
+  if (!matched) return "";
+  return decodeURIComponent(matched.slice(target.length));
+}
+
+function setCookie(name: string, value: string, maxAgeSeconds = 60 * 60 * 24 * 7) {
+  const key = encodeURIComponent(name);
+  const val = encodeURIComponent(value);
+  document.cookie = `${key}=${val}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax`;
+}
+
+function clearCookie(name: string) {
+  const key = encodeURIComponent(name);
+  document.cookie = `${key}=; Path=/; Max-Age=0; SameSite=Lax`;
+}
+
 export const tokenStorage = {
-  getAccessToken: () => localStorage.getItem(ACCESS) || "",
-  getRefreshToken: () => localStorage.getItem(REFRESH) || "",
-  setAccessToken: (t: string) => localStorage.setItem(ACCESS, t),
-  setRefreshToken: (t: string) => localStorage.setItem(REFRESH, t),
+  getAccessToken: () => {
+    const fromCookie = getCookie(ACCESS);
+    const fromLocal = localStorage.getItem(ACCESS) || "";
+    const value = fromCookie || fromLocal;
+    return value && value !== "undefined" && value !== "null" ? value : "";
+  },
+  getRefreshToken: () => {
+    const fromCookie = getCookie(REFRESH);
+    const fromLocal = localStorage.getItem(REFRESH) || "";
+    const value = fromCookie || fromLocal;
+    return value && value !== "undefined" && value !== "null" ? value : "";
+  },
+  setAccessToken: (t: string) => {
+    if (!t) return;
+    setCookie(ACCESS, t);
+    localStorage.setItem(ACCESS, t);
+  },
+  setRefreshToken: (t: string) => {
+    if (!t) return;
+    setCookie(REFRESH, t);
+    localStorage.setItem(REFRESH, t);
+  },
   clear: () => {
+    clearCookie(ACCESS);
+    clearCookie(REFRESH);
     localStorage.removeItem(ACCESS);
     localStorage.removeItem(REFRESH);
   }

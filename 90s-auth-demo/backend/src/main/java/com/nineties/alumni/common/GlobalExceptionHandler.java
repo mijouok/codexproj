@@ -1,5 +1,6 @@
 package com.nineties.alumni.common;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -28,6 +29,11 @@ public class GlobalExceptionHandler {
         .body(ApiError.of("VALIDATION_ERROR", fields.toString()));
   }
 
+  @ExceptionHandler(DuplicateKeyException.class)
+  public ResponseEntity<ApiError> handleDuplicateKey(DuplicateKeyException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(ApiError.of("DUPLICATE_IDENTIFIER", "Email or phone already registered"));
+  }
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiError> handleUnknown(Exception ex) {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

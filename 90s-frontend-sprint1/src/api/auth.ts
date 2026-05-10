@@ -15,13 +15,7 @@ export const authApi = {
     await http.post("/api/auth/logout", {});
   },
   me: async (): Promise<MeResponse> => {
-    const token = tokenStorage.getAccessToken();
-    //console.log("token Get is :" + token);
-    const { data } = await http.get("/api/auth/me", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const { data } = await http.get("/api/auth/me");
     return data;
   }
 };

@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./store/authStore";
-import { RequireAuth, RequireHasSpace } from "./routes/RouteGuard";
+import { RequireAuth } from "./routes/RouteGuard";
 import AuthPage from "./pages/AuthPage";
 import JoinSpacePage from "./pages/JoinSpacePage";
 import MePage from "./pages/MePage";
@@ -25,9 +25,9 @@ export default function App() {
             path="/me"
             element={
               <RequireAuth>
-                <RequireHasSpace>
-                  <MePage />
-                </RequireHasSpace>
+                {/* Invite-code space gate disabled for now.
+                    Restore RequireHasSpace here to force users through /join. */}
+                <MePage />
               </RequireAuth>
             }
           />

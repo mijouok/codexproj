@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../store/authStore";
 
@@ -12,44 +12,63 @@ export default function MePage() {
 
   useEffect(() => {
     loadMe().catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadMe]);
 
-  if (!me) return <div style={{ padding: 24 }}>Loading...</div>;
+  if (!me) return <div className="x-loading">Loading...</div>;
 
   return (
-    <div style={{ maxWidth: 720, margin: "40px auto", padding: 24, fontFamily: "system-ui" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2 style={{ margin: 0 }}>个人主页</h2>
-        <button
-          onClick={async () => {
-            await logout();
-            nav("/auth", { replace: true });
-          }}
-        >
-          Logout
-        </button>
-      </div>
+    <div className="x-page">
+      <header className="x-topbar">
+        <div className="x-topbar-inner">
+          <div className="x-brand">校内网 90's Demo</div>
+          <button
+            className="x-btn x-btn-quiet"
+            onClick={async () => {
+              await logout();
+              nav("/auth", { replace: true });
+            }}
+          >
+            退出
+          </button>
+        </div>
+      </header>
 
-      <div style={{ marginTop: 14, lineHeight: 1.9 }}>
-        <div><b>昵称：</b>{me.nickname}</div>
-        <div><b>邮箱：</b>{me.email || "-"}</div>
-        <div><b>手机号：</b>{me.phone || "-"}</div>
-        <div><b>Trust Level：</b>{tlLabel(me.trust_level)}</div>
-      </div>
+      <main className="x-main">
+        <div className="x-layout-2col">
+          <section className="x-card">
+            <div className="x-card-header">个人主页</div>
+            <div className="x-card-body">
+              <div className="x-profile-grid">
+                <div className="x-profile-key">昵称</div>
+                <div>{me.nickname}</div>
+                <div className="x-profile-key">邮箱</div>
+                <div>{me.email || "-"}</div>
+                <div className="x-profile-key">手机号</div>
+                <div>{me.phone || "-"}</div>
+                <div className="x-profile-key">Trust Level</div>
+                <div>{tlLabel(me.trust_level)}</div>
+              </div>
+            </div>
+          </section>
 
-      <h3 style={{ marginTop: 24 }}>加入的空间</h3>
-      {(me.spaces?.length ?? 0) === 0 ? (
-        <div style={{ opacity: 0.7 }}>你还没有加入任何空间。</div>
-      ) : (
-        <ul>
-          {me.spaces.map((s) => (
-            <li key={s.id}>
-              {s.name} <span style={{ opacity: 0.7 }}>({s.membership_status})</span>
-            </li>
-          ))}
-        </ul>
-      )}
+          <aside className="x-card">
+            <div className="x-card-header">我的空间</div>
+            <div className="x-card-body">
+              {(me.spaces?.length ?? 0) === 0 ? (
+                <div className="x-muted">你还没有加入任何空间。</div>
+              ) : (
+                <ul className="x-list">
+                  {me.spaces.map((s) => (
+                    <li key={s.id}>
+                      {s.name} <span className="x-muted">({s.membership_status})</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </aside>
+        </div>
+      </main>
     </div>
   );
 }

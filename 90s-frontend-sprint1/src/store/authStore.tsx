@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "../api/auth";
 import { tokenStorage } from "../utils/storage";
-import type { MeResponse } from "../api/types";
+import type { MeResponse, TokenPair } from "../api/types";
 
 type AuthContextType = {
   me: MeResponse | null;
@@ -15,55 +15,76 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+function pickTokens(res: TokenPair) {
+  const access = res.access_token || res.accessToken || "";
+  const refresh = res.refresh_token || res.refreshToken || "";
+  return { access, refresh };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [me, setMe] = useState<MeResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   const isAuthed = !!tokenStorage.getAccessToken();//
 
-  async function loadMe() {
+  const loadMe = useCallback(async () => {
     const data = await authApi.me();
     setMe(data);
-  }
+  }, []);
 
-  async function login(identifier: string, password: string) {
+  const login = useCallback(async (identifier: string, password: string) => {
     const res = await authApi.login({ identifier, password });
-    tokenStorage.setAccessToken(res.accessToken);
-    tokenStorage.setRefreshToken(res.refreshToken);
+    const { access, refresh } = pickTokens(res);
+    if (!access) throw new Error("No access token in login response");
+    tokenStorage.setAccessToken(access);
+    tokenStorage.setRefreshToken(refresh);
     await loadMe();
-  }
+  }, [loadMe]);
 
-  async function register(identifier: string, nickname: string, password: string) {
+  const register = useCallback(async (identifier: string, nickname: string, password: string) => {
     const res = await authApi.register({ identifier, nickname, password });
-    tokenStorage.setAccessToken(res.accessToken);
-    tokenStorage.setRefreshToken(res.refreshToken);
+    const { access, refresh } = pickTokens(res);
+    if (!access) throw new Error("No access token in register response");
+    tokenStorage.setAccessToken(access);
+    tokenStorage.setRefreshToken(refresh);
     await loadMe();
-  }
+  }, [loadMe]);
 
-  async function logout() {
+  const logout = useCallback(async () => {
     try {
       await authApi.logout();
     } finally {
       tokenStorage.clear();
       setMe(null);
     }
-  }
+  }, []);
 
   useEffect(() => {
+    let active = true;
+
     (async () => {
       try {
         if (tokenStorage.getAccessToken()) {
           await loadMe();
         }
+      } catch {
+        tokenStorage.clear();
+        setMe(null);
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     })();
-  }, []);
+
+    return () => {
+      active = false;
+    };
+  }, [loadMe]);
 
   const value = useMemo(
     () => ({ me, isAuthed, loading, loadMe, login, register, logout }),
-    [me, isAuthed, loading]
+    [me, isAuthed, loading, loadMe, login, register, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
