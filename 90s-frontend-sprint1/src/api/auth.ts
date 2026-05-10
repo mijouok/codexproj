@@ -16,6 +16,10 @@ export const authApi = {
   },
   me: async (): Promise<MeResponse> => {
     const { data } = await http.get("/api/auth/me");
-    return data;
+    const normalizedTrustLevel = data.trust_level ?? data.trustLevel;
+    return {
+      ...data,
+      trust_level: normalizedTrustLevel
+    };
   }
 };
