@@ -393,6 +393,24 @@ a:hover {
   font-size: 12px;
 }
 
+.x-home-postbox {
+  margin: 0 0 8px;
+}
+
+.x-home-postbox-inline {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.x-home-small-btn {
+  margin-top: 6px;
+  padding: 5px 9px;
+  font-size: 12px;
+}
+
 .x-home-feed {
   list-style: none;
   margin: 0;
