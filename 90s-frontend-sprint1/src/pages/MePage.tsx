@@ -1,6 +1,8 @@
-﻿import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../store/authStore";
+import { homeApi } from "../api/home";
+import type { HomeResponse } from "../api/types";
 
 function tlLabel(tl: 0 | 1 | 2 | 3) {
   return ["L0", "L1", "L2", "L3"][tl];
@@ -9,40 +11,50 @@ function tlLabel(tl: 0 | 1 | 2 | 3) {
 export default function MePage() {
   const nav = useNavigate();
   const { me, loadMe, logout } = useAuth();
+  const [home, setHome] = useState<HomeResponse | null>(null);
 
   useEffect(() => {
     loadMe().catch(() => {});
   }, [loadMe]);
 
+  useEffect(() => {
+    homeApi
+      .getHome()
+      .then(setHome)
+      .catch(() => {
+        setHome(null);
+      });
+  }, []);
+
   if (!me) return <div className="x-loading">Loading...</div>;
 
-  const school = "江城大学";
-  const department = "计算机与信息工程学院";
-  const albumItems = ["操场日落", "图书馆角落", "宿舍夜聊", "校园小路", "社团海报", "期末周"];
-  const visitors = [
-    { name: "阿泽", note: "来踩一脚", time: "今天 11:42" },
-    { name: "小鱼", note: "顺路看看你", time: "今天 10:18" },
-    { name: "梨子", note: "刚路过主页", time: "昨天 23:07" },
-    { name: "Momo", note: "给你留言啦", time: "昨天 20:31" }
-  ];
+  const school = home?.school || "Jiangcheng University";
+  const department = home?.department || "School of Computer and Information Engineering";
+  const statusText = home?.statusText || "Busy with finals these days.";
+  const albums = home?.albums || [];
+  const messages = home?.messages || [];
+  const activities = home?.activities || [];
+  const visitors = home?.visitors || [];
+  const widgets = home?.widgets || [];
+  const spaces = home?.spaces || [];
 
   return (
     <div className="x-page">
       <header className="x-topbar x-home-topbar">
         <div className="x-topbar-inner x-home-topbar-inner">
           <div className="x-home-brand-wrap">
-            <div className="x-brand x-home-brand">校内网</div>
-            <div className="x-home-brand-sub">青春不散场</div>
+            <div className="x-brand x-home-brand">Xiaonei</div>
+            <div className="x-home-brand-sub">Campus Memories</div>
           </div>
           <nav className="x-home-nav">
-            <a href="#">主页</a>
-            <a href="#">好友</a>
-            <a href="#">相册</a>
-            <a href="#">留言</a>
-            <a href="#">小组</a>
+            <a href="#">Home</a>
+            <a href="#">Friends</a>
+            <a href="#">Albums</a>
+            <a href="#">Wall</a>
+            <a href="#">Groups</a>
           </nav>
           <div className="x-home-user-ops">
-            <span className="x-home-welcome">欢迎你，{me.nickname}</span>
+            <span className="x-home-welcome">Welcome, {me.nickname}</span>
             <button
               className="x-btn x-btn-quiet x-home-logout"
               onClick={async () => {
@@ -50,7 +62,7 @@ export default function MePage() {
                 nav("/auth", { replace: true });
               }}
             >
-              退出
+              Logout
             </button>
           </div>
         </div>
@@ -59,7 +71,7 @@ export default function MePage() {
       <main className="x-main x-home-main">
         <div className="x-home-layout">
           <aside className="x-card x-home-card">
-            <div className="x-home-section-title">个人档案</div>
+            <div className="x-home-section-title">Profile</div>
             <div className="x-card-body x-home-compact">
               <div className="x-home-profile-head">
                 <div className="x-home-avatar" aria-hidden="true">
@@ -74,124 +86,112 @@ export default function MePage() {
               <table className="x-home-table" role="presentation">
                 <tbody>
                   <tr>
-                    <th>状态</th>
-                    <td>最近在忙期末，图书馆常驻中。</td>
+                    <th>Status</th>
+                    <td>{statusText}</td>
                   </tr>
                   <tr>
-                    <th>邮箱</th>
-                    <td>{me.email || "还没填写"}</td>
+                    <th>Email</th>
+                    <td>{me.email || "Not set"}</td>
                   </tr>
                   <tr>
-                    <th>手机号</th>
-                    <td>{me.phone || "暂未公开"}</td>
+                    <th>Phone</th>
+                    <td>{me.phone || "Private"}</td>
                   </tr>
                   <tr>
-                    <th>信任等级</th>
+                    <th>Trust</th>
                     <td>{tlLabel(me.trust_level)}</td>
                   </tr>
                 </tbody>
               </table>
               <div className="x-home-links">
-                <a href="#">写新状态</a>
-                <a href="#">编辑资料</a>
-                <a href="#">管理相册</a>
+                <a href="#">Post status</a>
+                <a href="#">Edit profile</a>
+                <a href="#">Manage albums</a>
               </div>
             </div>
           </aside>
 
           <section className="x-home-center">
             <article className="x-card x-home-card">
-              <div className="x-home-section-title">留言板</div>
+              <div className="x-home-section-title">Wall</div>
               <div className="x-card-body x-home-compact">
                 <ul className="x-home-feed">
-                  <li>
-                    <strong>小楠</strong>：明天早点去占座呀，复习资料我带过去。
-                    <a href="#">回复</a>
-                    <span>今天 12:02</span>
-                  </li>
-                  <li>
-                    <strong>阿泽</strong>：你上次拍的操场晚霞太绝了，记得发原图！
-                    <a href="#">回复</a>
-                    <span>今天 09:47</span>
-                  </li>
-                  <li>
-                    <strong>团团</strong>：来踩一脚，祝你这周小测稳稳过。
-                    <a href="#">回复</a>
-                    <span>昨天 22:16</span>
-                  </li>
+                  {messages.map((item) => (
+                    <li key={`${item.fromNickname}-${item.timeText}-${item.content}`}>
+                      <strong>{item.fromNickname}</strong>: {item.content}
+                      <a href="#">{item.actionText}</a>
+                      <span>{item.timeText}</span>
+                    </li>
+                  ))}
+                  {messages.length === 0 && <li className="x-muted">No new posts yet.</li>}
                 </ul>
               </div>
             </article>
 
             <article className="x-card x-home-card">
-              <div className="x-home-section-title">好友动态</div>
+              <div className="x-home-section-title">Friend Updates</div>
               <div className="x-card-body x-home-compact">
                 <ul className="x-home-feed">
-                  <li>
-                    <strong>林同学</strong> 刚上传了新相册《春天的操场》
-                    <a href="#">去看看</a>
-                    <span>5 分钟前</span>
-                  </li>
-                  <li>
-                    <strong>阿苗</strong> 更新状态：食堂二楼今天的糖醋排骨好评。
-                    <a href="#">回复</a>
-                    <span>38 分钟前</span>
-                  </li>
-                  <li>
-                    <strong>小雨</strong> 在留言板给你留言：期末后一起拍毕业照！
-                    <a href="#">查看</a>
-                    <span>今天 08:21</span>
-                  </li>
+                  {activities.map((item) => (
+                    <li key={`${item.actorNickname}-${item.timeText}-${item.content}`}>
+                      <strong>{item.actorNickname}</strong> {item.content}
+                      <a href="#">{item.actionText}</a>
+                      <span>{item.timeText}</span>
+                    </li>
+                  ))}
+                  {activities.length === 0 && <li className="x-muted">Friends are quiet for now.</li>}
                 </ul>
               </div>
             </article>
 
             <article className="x-card x-home-card">
-              <div className="x-home-section-title">相册缩略图</div>
+              <div className="x-home-section-title">Album Thumbnails</div>
               <div className="x-card-body x-home-compact">
                 <div className="x-home-gallery">
-                  {albumItems.map((name, idx) => (
-                    <a href="#" key={name} className="x-home-thumb">
-                      <div className="x-home-thumb-img">{idx + 1}</div>
-                      <div className="x-home-thumb-title">{name}</div>
+                  {albums.map((item) => (
+                    <a href="#" key={`${item.title}-${item.marker}`} className="x-home-thumb">
+                      <div className="x-home-thumb-img">{item.marker}</div>
+                      <div className="x-home-thumb-title">{item.title}</div>
                     </a>
                   ))}
                 </div>
+                {albums.length === 0 && <div className="x-muted">No albums uploaded yet.</div>}
               </div>
             </article>
           </section>
 
           <aside className="x-home-right">
             <article className="x-card x-home-card">
-              <div className="x-home-section-title">来访记录</div>
+              <div className="x-home-section-title">Visitors</div>
               <div className="x-card-body x-home-compact">
                 <ul className="x-home-visitor-list">
-                  {visitors.map((v) => (
-                    <li key={`${v.name}-${v.time}`}>
-                      <div className="x-home-visitor-avatar">{v.name[0]}</div>
+                  {visitors.map((item) => (
+                    <li key={`${item.nickname}-${item.timeText}`}>
+                      <div className="x-home-visitor-avatar">{item.nickname[0]}</div>
                       <div>
                         <div>
-                          <strong>{v.name}</strong>
-                          <span className="x-home-visitor-note">{v.note}</span>
+                          <strong>{item.nickname}</strong>
+                          <span className="x-home-visitor-note">{item.note}</span>
                         </div>
-                        <div className="x-muted">{v.time}</div>
+                        <div className="x-muted">{item.timeText}</div>
                       </div>
                     </li>
                   ))}
+                  {visitors.length === 0 && <li className="x-muted">No visitor records yet.</li>}
                 </ul>
               </div>
             </article>
 
             <article className="x-card x-home-card">
-              <div className="x-home-section-title">我的空间</div>
+              <div className="x-home-section-title">My Spaces</div>
               <div className="x-card-body x-home-compact">
-                {(me.spaces?.length ?? 0) === 0 ? (
-                  <div className="x-muted">你还没有加入任何空间。</div>
+                {spaces.length === 0 ? (
+                  <div className="x-muted">You have not joined any space yet.</div>
                 ) : (
                   <ul className="x-list x-home-list-tight">
-                    {me.spaces.map((s) => (
-                      <li key={s.id}>
-                        {s.name} <span className="x-muted">({s.membership_status})</span>
+                    {spaces.map((s) => (
+                      <li key={`${s.name}-${s.membershipStatus}`}>
+                        {s.name} <span className="x-muted">({s.membershipStatus})</span>
                       </li>
                     ))}
                   </ul>
@@ -200,17 +200,14 @@ export default function MePage() {
             </article>
 
             <article className="x-card x-home-card">
-              <div className="x-home-section-title">今日小组件</div>
+              <div className="x-home-section-title">Today Widgets</div>
               <div className="x-card-body x-home-compact x-home-widget">
-                <p>
-                  <strong>心情天气：</strong> 多云转晴，适合晚自习后散步。
-                </p>
-                <p>
-                  <strong>最近在听：</strong> 《稻香》循环第 27 次。
-                </p>
-                <p>
-                  <strong>宿舍公告：</strong> 周六晚上记得交水电费。
-                </p>
+                {widgets.map((item) => (
+                  <p key={item.title}>
+                    <strong>{item.title}:</strong> {item.content}
+                  </p>
+                ))}
+                {widgets.length === 0 && <p className="x-muted">No widget content available.</p>}
               </div>
             </article>
           </aside>

@@ -22,3 +22,50 @@ export type MeResponse = {
 
 export type LoginReq = { identifier: string; password: string };
 export type RegisterReq = { identifier: string; nickname: string; password: string };
+
+export type HomeSpace = {
+  name: string;
+  membershipStatus: "ACTIVE" | "PENDING" | "REJECTED" | string;
+};
+
+export type HomeMessage = {
+  fromNickname: string;
+  content: string;
+  actionText: string;
+  timeText: string;
+};
+
+export type HomeActivity = {
+  actorNickname: string;
+  content: string;
+  actionText: string;
+  timeText: string;
+};
+
+export type HomeAlbumItem = {
+  title: string;
+  marker: string;
+};
+
+export type HomeVisitor = {
+  nickname: string;
+  note: string;
+  timeText: string;
+};
+
+export type HomeWidget = {
+  title: string;
+  content: string;
+};
+
+export type HomeResponse = {
+  school: string;
+  department: string;
+  statusText: string;
+  spaces: HomeSpace[];
+  messages: HomeMessage[];
+  activities: HomeActivity[];
+  albums: HomeAlbumItem[];
+  visitors: HomeVisitor[];
+  widgets: HomeWidget[];
+};

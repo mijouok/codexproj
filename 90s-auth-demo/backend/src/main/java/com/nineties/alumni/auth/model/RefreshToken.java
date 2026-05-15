@@ -15,10 +15,10 @@ public class RefreshToken {
   @Id
   private String id;
 
-  @Indexed(name = "userId_1")
+  @Indexed(name = "userId")
   private String userId;
 
-  @Indexed(name = "tokenHash_1", unique = true)
+  @Indexed(name = "tokenHash", unique = true)
   private String tokenHash;
 
   private String deviceId;

@@ -17,7 +17,7 @@ public class Space {
 
   private String name;
 
-  @Indexed(name = "slug_1", unique = true)
+  @Indexed(name = "slug", unique = true)
   private String slug;
 
   private String createdBy;
