@@ -23,7 +23,7 @@ async function refreshAccessToken(): Promise<string> {
 
   const res = await axios.post(
     `${BASE_URL}/api/auth/refresh`,
-    { refresh_token: refreshToken },
+    { refreshToken: refreshToken },
     { headers: { "Content-Type": "application/json" } }
   );
 

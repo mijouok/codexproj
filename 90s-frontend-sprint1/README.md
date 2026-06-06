@@ -34,7 +34,7 @@ npm run dev
 
 - POST `/api/auth/register`  { identifier, nickname, password } -> { access_token, refresh_token }
 - POST `/api/auth/login`     { identifier, password } -> { access_token, refresh_token }
-- POST `/api/auth/refresh`   { refresh_token } -> { access_token, refresh_token }
+- POST `/api/auth/refresh`   { refreshToken } -> { accessToken, refreshToken }
 - POST `/api/auth/logout`    {}
 - GET  `/api/auth/me`        -> { id, nickname, email?, phone?, trust_level, spaces: [{id,name,membership_status}] }
 
