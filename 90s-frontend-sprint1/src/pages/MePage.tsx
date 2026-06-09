@@ -23,13 +23,16 @@ export default function MePage() {
   const [messageDraft, setMessageDraft] = useState("");
   const [postingStatus, setPostingStatus] = useState(false);
   const [postingMessage, setPostingMessage] = useState(false);
+  const [homeError, setHomeError] = useState("");
 
   const refreshHome = useCallback(async () => {
     try {
       const data = await homeApi.getHome();
       setHome(data);
+      setHomeError("");
     } catch {
       setHome(null);
+      setHomeError("主页数据暂时加载失败");
     }
   }, []);
 
@@ -43,15 +46,15 @@ export default function MePage() {
 
   if (!me) return <div className="x-loading">Loading...</div>;
 
-  const school = home?.school || "\u6c5f\u57ce\u5927\u5b66";
-  const department = home?.department || "\u8ba1\u7b97\u673a\u4e0e\u4fe1\u606f\u5de5\u7a0b\u5b66\u9662";
-  const statusText = home?.statusText || "\u6700\u8fd1\u5728\u5fd9\u671f\u672b\uff0c\u56fe\u4e66\u9986\u5e38\u9a7b\u4e2d\u3002";
-  const albums = home?.albums || [];
-  const messages = home?.messages || [];
-  const activities = home?.activities || [];
-  const visitors = home?.visitors || [];
-  const widgets = home?.widgets || [];
-  const spaces = home?.spaces || [];
+  const school = home?.school ?? (homeError ? "\u6570\u636e\u52a0\u8f7d\u5931\u8d25" : "\u52a0\u8f7d\u4e2d");
+  const department = home?.department ?? "";
+  const statusText = home?.statusText ?? (homeError ? "\u6682\u65f6\u65e0\u6cd5\u8bfb\u53d6\u72b6\u6001" : "\u52a0\u8f7d\u4e2d...");
+  const albums = home?.albums ?? [];
+  const messages = home?.messages ?? [];
+  const activities = home?.activities ?? [];
+  const visitors = home?.visitors ?? [];
+  const widgets = home?.widgets ?? [];
+  const spaces = home?.spaces ?? [];
 
   async function submitStatus() {
     if (!statusDraft.trim() || postingStatus) return;
@@ -108,6 +111,7 @@ export default function MePage() {
       </header>
 
       <main className="x-main x-home-main">
+        {homeError && <div className="x-error x-home-alert">{homeError}</div>}
         <div className="x-home-layout">
           <aside className="x-card x-home-card">
             <div className="x-home-section-title">{"\u4e2a\u4eba\u6863\u6848"}</div>

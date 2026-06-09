@@ -11,4 +11,6 @@ public interface HomeStatusPostRepository extends MongoRepository<HomeStatusPost
   Optional<HomeStatusPost> findTopByUserIdOrderByCreatedAtDesc(String userId);
 
   List<HomeStatusPost> findTop20ByUserIdInOrderByCreatedAtDesc(Collection<String> userIds);
+
+  long countByUserIdIn(Collection<String> userIds);
 }

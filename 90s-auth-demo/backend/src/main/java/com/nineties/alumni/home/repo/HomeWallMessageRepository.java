@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface HomeWallMessageRepository extends MongoRepository<HomeWallMessage, String> {
   List<HomeWallMessage> findTop20ByToUserIdOrderByCreatedAtDesc(String toUserId);
+
+  long countByToUserId(String toUserId);
 }

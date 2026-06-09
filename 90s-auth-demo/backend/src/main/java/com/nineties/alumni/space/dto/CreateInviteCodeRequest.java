@@ -1,12 +1,16 @@
 package com.nineties.alumni.space.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 
 public class CreateInviteCodeRequest {
-  @NotNull
+  @NotBlank
   private String type; // SINGLE_USE or MULTI_USE
 
+  @Min(1)
   private Integer maxUses;
+
+  @Min(1)
   private Integer expiresInDays;
 
   public String getType() { return type; }

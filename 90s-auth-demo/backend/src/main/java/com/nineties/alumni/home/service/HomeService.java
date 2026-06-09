@@ -19,9 +19,10 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,18 +65,27 @@ public class HomeService {
         })
         .toList();
 
-    List<User> peers = userRepository.findAll().stream()
-        .filter(u -> !u.getId().equals(userId))
-        .sorted(Comparator.comparing(User::getLastLoginAt, Comparator.nullsLast(Comparator.reverseOrder()))
-            .thenComparing(User::getUpdatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+    List<String> spaceIds = memberships.stream()
+        .map(Membership::getSpaceId)
+        .distinct()
         .toList();
 
-    Map<String, String> nicknameById = userRepository.findAll().stream()
+    Set<String> peerIds = spaceIds.isEmpty()
+        ? Set.of()
+        : membershipRepository.findBySpaceIdInAndMembershipStatus(spaceIds, MembershipStatus.ACTIVE)
+            .stream()
+            .map(Membership::getUserId)
+            .filter(id -> !id.equals(userId))
+            .collect(Collectors.toSet());
+
+    Set<String> visibleUserIds = new HashSet<>(peerIds);
+    visibleUserIds.add(userId);
+    Map<String, String> nicknameById = userRepository.findAllById(visibleUserIds).stream()
         .collect(Collectors.toMap(User::getId, u -> displayName(u.getNickname()), (left, right) -> left));
 
     String statusText = homeStatusPostRepository.findTopByUserIdOrderByCreatedAtDesc(userId)
         .map(HomeStatusPost::getContent)
-        .orElse("Busy with finals these days.");
+        .orElse("还没有发布状态。");
 
     List<HomeResponse.HomeMessage> messages = homeWallMessageRepository.findTop20ByToUserIdOrderByCreatedAtDesc(userId)
         .stream()
@@ -87,11 +97,6 @@ public class HomeService {
         ))
         .toList();
 
-    if (messages.isEmpty()) {
-      messages = defaultMessages(peers);
-    }
-
-    List<String> peerIds = peers.stream().map(User::getId).toList();
     List<HomeResponse.HomeActivity> activities = new ArrayList<>();
     if (!peerIds.isEmpty()) {
       activities = homeStatusPostRepository.findTop20ByUserIdInOrderByCreatedAtDesc(peerIds)
@@ -105,44 +110,15 @@ public class HomeService {
           .toList();
     }
 
-    if (activities.isEmpty()) {
-      activities = defaultActivities(peers);
-    }
+    List<HomeResponse.HomeAlbumItem> albums = List.of();
 
-    List<HomeResponse.HomeAlbumItem> albums = List.of(
-        new HomeResponse.HomeAlbumItem("Field Sunset", "1"),
-        new HomeResponse.HomeAlbumItem("Library Corner", "2"),
-        new HomeResponse.HomeAlbumItem("Dorm Chat", "3"),
-        new HomeResponse.HomeAlbumItem("Campus Path", "4"),
-        new HomeResponse.HomeAlbumItem("Club Poster", "5"),
-        new HomeResponse.HomeAlbumItem("Final Week", "6")
-    );
+    List<HomeResponse.HomeVisitor> visitors = List.of();
 
-    List<HomeResponse.HomeVisitor> visitors = peers.stream()
-        .limit(4)
-        .map(u -> new HomeResponse.HomeVisitor(
-            displayName(u.getNickname()),
-            "Dropped by",
-            humanize(u.getLastLoginAt() != null ? u.getLastLoginAt() : u.getUpdatedAt())
-        ))
-        .toList();
-
-    if (visitors.isEmpty()) {
-      visitors = List.of(
-          new HomeResponse.HomeVisitor("Classmate A", "Dropped by", "Today"),
-          new HomeResponse.HomeVisitor("Classmate B", "Checked your page", "Yesterday")
-      );
-    }
-
-    List<HomeResponse.HomeWidget> widgets = List.of(
-        new HomeResponse.HomeWidget("Mood", "Cloudy then sunny, good for a night walk."),
-        new HomeResponse.HomeWidget("Now Playing", "Rice Fragrance on repeat."),
-        new HomeResponse.HomeWidget("Dorm Notice", "Remember to pay utilities on Saturday night.")
-    );
+    List<HomeResponse.HomeWidget> widgets = buildWidgets(userId, spaceCards.size(), peerIds);
 
     return new HomeResponse(
-        "Jiangcheng University",
-        "School of Computer and Information Engineering",
+        primarySchool(spaceCards),
+        primaryDepartment(spaceCards),
         statusText,
         spaceCards,
         messages,
@@ -176,33 +152,28 @@ public class HomeService {
     homeWallMessageRepository.save(message);
   }
 
-  private List<HomeResponse.HomeMessage> defaultMessages(List<User> peers) {
-    String n1 = pick(peers, 0, "Xiao Nan");
-    String n2 = pick(peers, 1, "A Ze");
-    String n3 = pick(peers, 2, "Tuan Tuan");
+  private List<HomeResponse.HomeWidget> buildWidgets(String userId, int spaceCount, Set<String> peerIds) {
+    long messageCount = homeWallMessageRepository.countByToUserId(userId);
+    long peerActivityCount = peerIds.isEmpty() ? 0 : homeStatusPostRepository.countByUserIdIn(peerIds);
     return List.of(
-        new HomeResponse.HomeMessage(n1, "See you in the library tomorrow morning.", "Reply", "Today 12:02"),
-        new HomeResponse.HomeMessage(n2, "Your sunset photos from the field are amazing.", "Reply", "Today 09:47"),
-        new HomeResponse.HomeMessage(n3, "Dropping by your page. Good luck this week!", "Reply", "Yesterday 22:16")
+        new HomeResponse.HomeWidget("已加入空间", String.valueOf(spaceCount)),
+        new HomeResponse.HomeWidget("收到留言", String.valueOf(messageCount)),
+        new HomeResponse.HomeWidget("同空间动态", String.valueOf(peerActivityCount))
     );
   }
 
-  private List<HomeResponse.HomeActivity> defaultActivities(List<User> peers) {
-    String n1 = pick(peers, 0, "Lin");
-    String n2 = pick(peers, 1, "A Miao");
-    String n3 = pick(peers, 2, "Xiao Yu");
-    return List.of(
-        new HomeResponse.HomeActivity(n1, "uploaded a new album: Spring Field", "Open", "5 min ago"),
-        new HomeResponse.HomeActivity(n2, "updated status: Cafeteria lunch was great today.", "Reply", "38 min ago"),
-        new HomeResponse.HomeActivity(n3, "left a note on your wall.", "View", "Today 08:21")
-    );
-  }
-
-  private String pick(List<User> peers, int index, String fallback) {
-    if (index >= peers.size()) {
-      return fallback;
+  private String primarySchool(List<HomeResponse.HomeSpace> spaceCards) {
+    if (spaceCards.isEmpty()) {
+      return "未加入空间";
     }
-    return displayName(peers.get(index).getNickname());
+    return spaceCards.get(0).name();
+  }
+
+  private String primaryDepartment(List<HomeResponse.HomeSpace> spaceCards) {
+    if (spaceCards.isEmpty()) {
+      return "待完善资料";
+    }
+    return "来自 " + spaceCards.get(0).name();
   }
 
   private String displayName(String nickname) {

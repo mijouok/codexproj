@@ -10,8 +10,8 @@ spring:
 app:
   jwt:
     issuer: "90s-alumni-demo"
-    access_token_minutes: 15
-    refresh_token_days: 30
+    accessTokenMinutes: 15
+    refreshTokenDays: 30
     # IMPORTANT: change this in real deployment
     secret: "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_AT_LEAST_64_CHARS__________________________"
 

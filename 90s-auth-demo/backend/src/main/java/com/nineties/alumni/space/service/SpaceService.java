@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Locale;
 
 @Service
 public class SpaceService {
@@ -65,9 +66,13 @@ public class SpaceService {
 
   public String createInviteCode(String spaceId, CreateInviteCodeRequest req, String requesterUserId) {
     requireActiveMember(spaceId, requesterUserId);
+    if (!roleService.hasAnySpaceRole(requesterUserId, spaceId, RoleNames.SPACE_OWNER, RoleNames.SPACE_ADMIN)) {
+      throw new ApiException("FORBIDDEN", "Only space owners and admins can create invite codes", HttpStatus.FORBIDDEN);
+    }
+
     InviteCodeType inviteCodeType;
     try {
-      inviteCodeType = InviteCodeType.valueOf(req.getType());
+      inviteCodeType = InviteCodeType.valueOf(req.getType().trim().toUpperCase(Locale.ROOT));
     } catch (IllegalArgumentException ex) {
       throw new ApiException("INVALID_INVITE_TYPE", "Invite code type is invalid", HttpStatus.BAD_REQUEST);
     }
@@ -77,7 +82,10 @@ public class SpaceService {
     code.setCode(generateCode());
     code.setCreatedBy(requesterUserId);
     code.setType(inviteCodeType);
-    code.setMaxUses(req.getMaxUses() == null ? 50 : req.getMaxUses());
+    int maxUses = inviteCodeType == InviteCodeType.SINGLE_USE
+        ? 1
+        : req.getMaxUses() == null ? 50 : req.getMaxUses();
+    code.setMaxUses(maxUses);
     int days = req.getExpiresInDays() == null ? 30 : req.getExpiresInDays();
     code.setExpiresAt(Instant.now().plusSeconds(days * 86400L));
     inviteCodeRepository.save(code);

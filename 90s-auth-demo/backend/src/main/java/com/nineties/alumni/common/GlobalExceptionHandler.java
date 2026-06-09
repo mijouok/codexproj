@@ -37,6 +37,6 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiError> handleUnknown(Exception ex) {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ApiError.of("INTERNAL_ERROR", ex.getMessage()));
+        .body(ApiError.of("INTERNAL_ERROR", "Unexpected server error"));
   }
 }

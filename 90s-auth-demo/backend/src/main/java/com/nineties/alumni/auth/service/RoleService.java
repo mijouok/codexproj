@@ -46,6 +46,25 @@ public class RoleService {
 
   public List<String> listPlatformRoleNames(String userId) {
     List<UserRole> urs = userRoleRepository.findByUserIdAndScopeType(userId, "PLATFORM");
+    return roleNames(urs);
+  }
+
+  public List<String> listSpaceRoleNames(String userId, String spaceId) {
+    List<UserRole> urs = userRoleRepository.findByUserIdAndScopeTypeAndScopeId(userId, "SPACE", spaceId);
+    return roleNames(urs);
+  }
+
+  public boolean hasAnySpaceRole(String userId, String spaceId, String... roleNames) {
+    List<String> assigned = listSpaceRoleNames(userId, spaceId);
+    for (String roleName : roleNames) {
+      if (assigned.contains(roleName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private List<String> roleNames(List<UserRole> urs) {
     List<String> names = new ArrayList<>();
     for (UserRole ur : urs) {
       roleRepository.findById(ur.getRoleId()).ifPresent(r -> names.add(r.getName()));

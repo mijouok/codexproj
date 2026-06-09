@@ -1,6 +1,6 @@
 import { http } from "./http";
 import type { LoginReq, RegisterReq, MeResponse, TokenPair } from "./types";
-import {tokenStorage} from "../utils/storage";
+import { tokenStorage } from "../utils/storage";
 
 export const authApi = {
   login: async (req: LoginReq): Promise<TokenPair> => {
@@ -12,14 +12,17 @@ export const authApi = {
     return data;
   },
   logout: async (): Promise<void> => {
-    await http.post("/api/auth/logout", {});
+    const refreshToken = tokenStorage.getRefreshToken();
+    if (!refreshToken) return;
+    await http.post("/api/auth/logout", { refreshToken });
   },
   me: async (): Promise<MeResponse> => {
     const { data } = await http.get("/api/auth/me");
     const normalizedTrustLevel = data.trust_level ?? data.trustLevel;
     return {
       ...data,
-      trust_level: normalizedTrustLevel
+      trust_level: normalizedTrustLevel,
+      roles: data.roles ?? []
     };
   }
 };

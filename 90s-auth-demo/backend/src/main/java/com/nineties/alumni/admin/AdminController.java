@@ -1,5 +1,6 @@
 package com.nineties.alumni.admin;
 
+import com.nineties.alumni.admin.dto.AdminUserResponse;
 import com.nineties.alumni.auth.model.User;
 import com.nineties.alumni.auth.model.UserStatus;
 import com.nineties.alumni.auth.repo.UserRepository;
@@ -21,26 +22,28 @@ public class AdminController {
   }
 
   @GetMapping("/users")
-  public List<User> listUsers(@RequestParam(required = false) String query) {
+  public List<AdminUserResponse> listUsers(@RequestParam(required = false) String query) {
     // Sprint 1: simple all-users listing. You can replace with search later.
-    return userRepository.findAll();
+    return userRepository.findAll().stream()
+        .map(AdminUserResponse::from)
+        .toList();
   }
 
   @PostMapping("/users/{id}/ban")
-  public User ban(@PathVariable String id) {
+  public AdminUserResponse ban(@PathVariable String id) {
     User u = userRepository.findById(id)
         .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
     u.setUpdatedAt(java.time.Instant.now());
     u.setStatus(UserStatus.BANNED);
-    return userRepository.save(u);
+    return AdminUserResponse.from(userRepository.save(u));
   }
 
   @PostMapping("/users/{id}/unban")
-  public User unban(@PathVariable String id) {
+  public AdminUserResponse unban(@PathVariable String id) {
     User u = userRepository.findById(id)
         .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
     u.setUpdatedAt(java.time.Instant.now());
     u.setStatus(UserStatus.ACTIVE);
-    return userRepository.save(u);
+    return AdminUserResponse.from(userRepository.save(u));
   }
 }

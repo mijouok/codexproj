@@ -12,12 +12,14 @@ export type MeSpace = {
 };
 
 export type MeResponse = {
-  id: string;
+  userId: string;
   nickname: string;
   email?: string;
   phone?: string;
+  trustLevel?: 0 | 1 | 2 | 3;
   trust_level: 0 | 1 | 2 | 3;
-  spaces: MeSpace[];
+  roles: string[];
+  spaces?: MeSpace[];
 };
 
 export type LoginReq = { identifier: string; password: string };
