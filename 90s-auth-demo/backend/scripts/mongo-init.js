@@ -12,9 +12,10 @@ const collections = [
   "roles",
   "user_roles",
   "refresh_tokens",
-  "spaces",
-  "memberships",
-  "space_invite_codes",
+  "home_status_posts",
+  "home_wall_messages",
+  "friend_requests",
+  "friendships",
 ];
 
 function ensureCollection(name) {
@@ -94,18 +95,20 @@ ensureCanonicalIndex(
   { name: "tokenHash_1", unique: true }
 );
 
-ensureCanonicalIndex(db.spaces, { slug: 1 }, { name: "slug_1", unique: true });
-
+ensureCanonicalIndex(db.home_status_posts, { userId: 1 }, { name: "userId_1" });
+ensureCanonicalIndex(db.home_wall_messages, { fromUserId: 1 }, { name: "fromUserId_1" });
+ensureCanonicalIndex(db.home_wall_messages, { toUserId: 1 }, { name: "toUserId_1" });
 ensureCanonicalIndex(
-  db.memberships,
-  { spaceId: 1, userId: 1 },
-  { name: "uk_membership_space_user", unique: true }
+  db.home_wall_messages,
+  { toUserId: 1, createdAt: -1 },
+  { name: "toUserId_createdAt" }
 );
-
+ensureCanonicalIndex(db.friend_requests, { requesterId: 1 }, { name: "requesterId_1" });
+ensureCanonicalIndex(db.friend_requests, { recipientId: 1 }, { name: "recipientId_1" });
 ensureCanonicalIndex(
-  db.space_invite_codes,
-  { code: 1 },
-  { name: "code_1", unique: true }
+  db.friendships,
+  { userAId: 1, userBId: 1 },
+  { name: "uk_friendship_pair", unique: true }
 );
 
 print("MongoDB schema initialization completed.");

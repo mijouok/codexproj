@@ -21,7 +21,6 @@ export default function AuthPage() {
         } catch {}
       }
       if (isAuthed && me) {
-        // Invite-code flow is disabled, so signed-in users go straight to the profile page.
         nav("/me", { replace: true });
       }
     })();
@@ -34,7 +33,6 @@ export default function AuthPage() {
       if (mode === "login") await login(identifier, password);
       else await register(identifier, nickname, password);
 
-      // Invite-code flow is disabled, so new sessions do not stop at /join.
       nav("/me", { replace: true });
     } catch (e: any) {
       setErr(e?.response?.data?.message || e?.message || "Auth failed");
@@ -123,7 +121,7 @@ export default function AuthPage() {
               <p style={{ marginTop: 0 }}>
                 这是 Sprint 1 的最小认证演示，页面样式参考了早期校内网的蓝白校园风格。
               </p>
-              <p>你可以先登录，再加入一个 Cohort Space。</p>
+              <p>你可以先登录，再从主页右侧的推荐同学发起好友申请。</p>
               <p style={{ marginBottom: 0, fontSize: 12 }}>
                 Demo 提示：refresh token 仅保存在 localStorage。
               </p>

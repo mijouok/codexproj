@@ -5,12 +5,6 @@ export type TokenPair = {
   refreshToken?: string;
 };
 
-export type MeSpace = {
-  id: string;
-  name: string;
-  membership_status: "ACTIVE" | "PENDING" | "REJECTED";
-};
-
 export type MeResponse = {
   userId: string;
   nickname: string;
@@ -19,18 +13,13 @@ export type MeResponse = {
   trustLevel?: 0 | 1 | 2 | 3;
   trust_level: 0 | 1 | 2 | 3;
   roles: string[];
-  spaces?: MeSpace[];
 };
 
 export type LoginReq = { identifier: string; password: string };
 export type RegisterReq = { identifier: string; nickname: string; password: string };
 
-export type HomeSpace = {
-  name: string;
-  membershipStatus: "ACTIVE" | "PENDING" | "REJECTED" | string;
-};
-
 export type HomeMessage = {
+  fromUserId: string;
   fromNickname: string;
   content: string;
   actionText: string;
@@ -38,6 +27,7 @@ export type HomeMessage = {
 };
 
 export type HomeActivity = {
+  actorUserId: string;
   actorNickname: string;
   content: string;
   actionText: string;
@@ -61,13 +51,46 @@ export type HomeWidget = {
 };
 
 export type HomeResponse = {
+  userId: string;
+  nickname: string;
+  email?: string;
+  phone?: string;
+  trustLevel: 0 | 1 | 2 | 3;
+  owner: boolean;
+  friendStatus: "SELF" | "NONE" | "OUTGOING" | "INCOMING" | "FRIEND" | string;
+  friendRequestId?: string;
   school: string;
   department: string;
   statusText: string;
-  spaces: HomeSpace[];
   messages: HomeMessage[];
   activities: HomeActivity[];
   albums: HomeAlbumItem[];
   visitors: HomeVisitor[];
   widgets: HomeWidget[];
+};
+
+export type FriendRequest = {
+  id: string;
+  requesterId: string;
+  requesterNickname: string;
+  recipientId: string;
+  recipientNickname: string;
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | string;
+  message?: string;
+  createdAt: string;
+  respondedAt?: string;
+};
+
+export type FriendSummary = {
+  userId: string;
+  nickname: string;
+  trustLevel: number;
+  createdAt: string;
+};
+
+export type FriendOverview = {
+  friends: FriendSummary[];
+  incoming: FriendRequest[];
+  outgoing: FriendRequest[];
+  suggestions: FriendSummary[];
 };

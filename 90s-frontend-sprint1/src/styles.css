@@ -431,10 +431,36 @@ a:hover {
   margin-left: 8px;
 }
 
+.x-link-button {
+  border: 0;
+  background: transparent;
+  color: var(--x-link);
+  padding: 0;
+  margin-left: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.x-link-button:hover {
+  text-decoration: underline;
+}
+
+.x-link-button:disabled {
+  color: var(--x-subtext);
+  cursor: not-allowed;
+}
+
 .x-home-feed span {
   margin-left: 8px;
   color: #71829b;
   font-size: 12px;
+}
+
+.x-home-subtitle {
+  margin: 8px 0 3px;
+  color: #4f6381;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .x-home-gallery {

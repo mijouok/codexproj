@@ -3,7 +3,8 @@ package com.nineties.alumni.security;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,8 +26,13 @@ public class SecurityConfig {
     http
         .csrf(csrf -> csrf.disable())
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .exceptionHandling(ex -> ex
+            .authenticationEntryPoint((request, response, authException) ->
+                response.sendError(HttpStatus.UNAUTHORIZED.value(), "Authentication is required"))
+        )
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/h2/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
+            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2/**").permitAll()
             .anyRequest().authenticated()
         )
         .headers(headers -> headers.frameOptions(frame -> frame.disable()))

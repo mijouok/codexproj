@@ -22,9 +22,6 @@ public class DataInitializer {
                          RoleService roleService) {
     return args -> {
       ensureRole(roleRepository, RoleNames.PLATFORM_ADMIN);
-      ensureRole(roleRepository, RoleNames.SPACE_OWNER);
-      ensureRole(roleRepository, RoleNames.SPACE_ADMIN);
-      ensureRole(roleRepository, RoleNames.SPACE_MODERATOR);
       ensureRole(roleRepository, RoleNames.MEMBER);
 
       // Default admin for demo

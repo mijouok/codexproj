@@ -20,9 +20,9 @@ public class UserRole {
 
   private String roleId;
 
-  private String scopeType; // PLATFORM or SPACE
+  private String scopeType; // PLATFORM
 
-  private String scopeId; // null for PLATFORM
+  private String scopeId; // reserved for future scoped roles
 
   private Instant createdAt = Instant.now();
 }

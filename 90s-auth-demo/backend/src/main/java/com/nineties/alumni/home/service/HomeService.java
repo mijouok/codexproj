@@ -3,16 +3,12 @@ package com.nineties.alumni.home.service;
 import com.nineties.alumni.auth.model.User;
 import com.nineties.alumni.auth.repo.UserRepository;
 import com.nineties.alumni.common.ApiException;
+import com.nineties.alumni.friend.service.FriendService;
 import com.nineties.alumni.home.dto.HomeResponse;
 import com.nineties.alumni.home.model.HomeStatusPost;
 import com.nineties.alumni.home.model.HomeWallMessage;
 import com.nineties.alumni.home.repo.HomeStatusPostRepository;
 import com.nineties.alumni.home.repo.HomeWallMessageRepository;
-import com.nineties.alumni.space.model.Membership;
-import com.nineties.alumni.space.model.MembershipStatus;
-import com.nineties.alumni.space.model.Space;
-import com.nineties.alumni.space.repo.MembershipRepository;
-import com.nineties.alumni.space.repo.SpaceRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -29,67 +25,48 @@ import java.util.stream.Collectors;
 public class HomeService {
 
   private final UserRepository userRepository;
-  private final MembershipRepository membershipRepository;
-  private final SpaceRepository spaceRepository;
   private final HomeStatusPostRepository homeStatusPostRepository;
   private final HomeWallMessageRepository homeWallMessageRepository;
+  private final FriendService friendService;
 
   public HomeService(UserRepository userRepository,
-                     MembershipRepository membershipRepository,
-                     SpaceRepository spaceRepository,
                      HomeStatusPostRepository homeStatusPostRepository,
-                     HomeWallMessageRepository homeWallMessageRepository) {
+                     HomeWallMessageRepository homeWallMessageRepository,
+                     FriendService friendService) {
     this.userRepository = userRepository;
-    this.membershipRepository = membershipRepository;
-    this.spaceRepository = spaceRepository;
     this.homeStatusPostRepository = homeStatusPostRepository;
     this.homeWallMessageRepository = homeWallMessageRepository;
+    this.friendService = friendService;
   }
 
   public HomeResponse buildHome(String userId) {
-    User me = userRepository.findById(userId)
+    return buildHome(userId, userId);
+  }
+
+  public HomeResponse buildHome(String viewerUserId, String profileUserId) {
+    User profileUser = userRepository.findById(profileUserId)
         .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
 
-    List<Membership> memberships = membershipRepository.findByUserIdAndMembershipStatus(userId, MembershipStatus.ACTIVE);
-    Map<String, Space> spacesById = spaceRepository.findAllById(
-            memberships.stream().map(Membership::getSpaceId).distinct().toList()
-        )
-        .stream()
-        .collect(Collectors.toMap(Space::getId, s -> s));
+    boolean owner = viewerUserId.equals(profileUserId);
+    if (!owner) {
+      requireProfileVisible(viewerUserId, profileUserId);
+    }
 
-    List<HomeResponse.HomeSpace> spaceCards = memberships.stream()
-        .map(m -> {
-          Space s = spacesById.get(m.getSpaceId());
-          String name = s != null ? s.getName() : "Unknown Space";
-          return new HomeResponse.HomeSpace(name, m.getMembershipStatus().name());
-        })
-        .toList();
-
-    List<String> spaceIds = memberships.stream()
-        .map(Membership::getSpaceId)
-        .distinct()
-        .toList();
-
-    Set<String> peerIds = spaceIds.isEmpty()
-        ? Set.of()
-        : membershipRepository.findBySpaceIdInAndMembershipStatus(spaceIds, MembershipStatus.ACTIVE)
-            .stream()
-            .map(Membership::getUserId)
-            .filter(id -> !id.equals(userId))
-            .collect(Collectors.toSet());
+    Set<String> peerIds = friendService.friendIds(profileUserId);
 
     Set<String> visibleUserIds = new HashSet<>(peerIds);
-    visibleUserIds.add(userId);
+    visibleUserIds.add(profileUserId);
     Map<String, String> nicknameById = userRepository.findAllById(visibleUserIds).stream()
         .collect(Collectors.toMap(User::getId, u -> displayName(u.getNickname()), (left, right) -> left));
 
-    String statusText = homeStatusPostRepository.findTopByUserIdOrderByCreatedAtDesc(userId)
+    String statusText = homeStatusPostRepository.findTopByUserIdOrderByCreatedAtDesc(profileUserId)
         .map(HomeStatusPost::getContent)
-        .orElse("还没有发布状态。");
+        .orElse("No status yet.");
 
-    List<HomeResponse.HomeMessage> messages = homeWallMessageRepository.findTop20ByToUserIdOrderByCreatedAtDesc(userId)
+    List<HomeResponse.HomeMessage> messages = homeWallMessageRepository.findTop20ByToUserIdOrderByCreatedAtDesc(profileUserId)
         .stream()
         .map(m -> new HomeResponse.HomeMessage(
+            m.getFromUserId(),
             nicknameById.getOrDefault(m.getFromUserId(), "Classmate"),
             m.getContent(),
             "Reply",
@@ -102,6 +79,7 @@ public class HomeService {
       activities = homeStatusPostRepository.findTop20ByUserIdInOrderByCreatedAtDesc(peerIds)
           .stream()
           .map(s -> new HomeResponse.HomeActivity(
+              s.getUserId(),
               nicknameById.getOrDefault(s.getUserId(), "Classmate"),
               "updated status: " + s.getContent(),
               "View",
@@ -114,13 +92,20 @@ public class HomeService {
 
     List<HomeResponse.HomeVisitor> visitors = List.of();
 
-    List<HomeResponse.HomeWidget> widgets = buildWidgets(userId, spaceCards.size(), peerIds);
+    List<HomeResponse.HomeWidget> widgets = buildWidgets(profileUserId, peerIds);
 
     return new HomeResponse(
-        primarySchool(spaceCards),
-        primaryDepartment(spaceCards),
+        profileUser.getId(),
+        displayName(profileUser.getNickname()),
+        owner ? profileUser.getEmail() : null,
+        owner ? profileUser.getPhone() : null,
+        profileUser.getTrustLevel(),
+        owner,
+        friendService.relationship(viewerUserId, profileUserId),
+        owner ? null : friendService.pendingRequestId(viewerUserId, profileUserId),
+        "Campus Network",
+        owner ? "My profile" : "Classmate profile",
         statusText,
-        spaceCards,
         messages,
         activities,
         albums,
@@ -140,40 +125,37 @@ public class HomeService {
     homeStatusPostRepository.save(status);
   }
 
-  public void createWallMessage(String userId, String content) {
-    userRepository.findById(userId)
+  public void createWallMessage(String fromUserId, String toUserId, String content) {
+    userRepository.findById(fromUserId)
         .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
+    userRepository.findById(toUserId)
+        .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
+    if (!fromUserId.equals(toUserId)) {
+      requireProfileVisible(fromUserId, toUserId);
+    }
 
     HomeWallMessage message = new HomeWallMessage();
-    message.setFromUserId(userId);
-    message.setToUserId(userId);
+    message.setFromUserId(fromUserId);
+    message.setToUserId(toUserId);
     message.setContent(content.trim());
     message.setCreatedAt(Instant.now());
     homeWallMessageRepository.save(message);
   }
 
-  private List<HomeResponse.HomeWidget> buildWidgets(String userId, int spaceCount, Set<String> peerIds) {
+  private void requireProfileVisible(String viewerUserId, String profileUserId) {
+    if (!friendService.canViewProfile(viewerUserId, profileUserId)) {
+      throw new ApiException("PROFILE_NOT_VISIBLE", "Profile is not visible", HttpStatus.FORBIDDEN);
+    }
+  }
+
+  private List<HomeResponse.HomeWidget> buildWidgets(String userId, Set<String> peerIds) {
     long messageCount = homeWallMessageRepository.countByToUserId(userId);
     long peerActivityCount = peerIds.isEmpty() ? 0 : homeStatusPostRepository.countByUserIdIn(peerIds);
     return List.of(
-        new HomeResponse.HomeWidget("已加入空间", String.valueOf(spaceCount)),
-        new HomeResponse.HomeWidget("收到留言", String.valueOf(messageCount)),
-        new HomeResponse.HomeWidget("同空间动态", String.valueOf(peerActivityCount))
+        new HomeResponse.HomeWidget("Friends", String.valueOf(peerIds.size())),
+        new HomeResponse.HomeWidget("Wall messages", String.valueOf(messageCount)),
+        new HomeResponse.HomeWidget("Friend activities", String.valueOf(peerActivityCount))
     );
-  }
-
-  private String primarySchool(List<HomeResponse.HomeSpace> spaceCards) {
-    if (spaceCards.isEmpty()) {
-      return "未加入空间";
-    }
-    return spaceCards.get(0).name();
-  }
-
-  private String primaryDepartment(List<HomeResponse.HomeSpace> spaceCards) {
-    if (spaceCards.isEmpty()) {
-      return "待完善资料";
-    }
-    return "来自 " + spaceCards.get(0).name();
   }
 
   private String displayName(String nickname) {

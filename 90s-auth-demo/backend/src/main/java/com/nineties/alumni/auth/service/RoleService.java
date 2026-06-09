@@ -34,34 +34,9 @@ public class RoleService {
     userRoleRepository.save(ur);
   }
 
-  public void assignSpaceRole(String userId, String spaceId, String roleName) {
-    Role role = requireRole(roleName);
-    UserRole ur = new UserRole();
-    ur.setUserId(userId);
-    ur.setRoleId(role.getId());
-    ur.setScopeType("SPACE");
-    ur.setScopeId(spaceId);
-    userRoleRepository.save(ur);
-  }
-
   public List<String> listPlatformRoleNames(String userId) {
     List<UserRole> urs = userRoleRepository.findByUserIdAndScopeType(userId, "PLATFORM");
     return roleNames(urs);
-  }
-
-  public List<String> listSpaceRoleNames(String userId, String spaceId) {
-    List<UserRole> urs = userRoleRepository.findByUserIdAndScopeTypeAndScopeId(userId, "SPACE", spaceId);
-    return roleNames(urs);
-  }
-
-  public boolean hasAnySpaceRole(String userId, String spaceId, String... roleNames) {
-    List<String> assigned = listSpaceRoleNames(userId, spaceId);
-    for (String roleName : roleNames) {
-      if (assigned.contains(roleName)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private List<String> roleNames(List<UserRole> urs) {
