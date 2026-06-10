@@ -556,3 +556,305 @@ a:hover {
     margin-left: auto;
   }
 }
+
+/* 90s poster skin */
+:root {
+  --x-bg: #a7d7f2;
+  --x-top: #1477bd;
+  --x-top-dark: #05518f;
+  --x-card-border: #d4e2ef;
+  --x-text: #12345a;
+  --x-subtext: #58708f;
+  --x-link: #075da8;
+  --x-input-border: #9ebedc;
+  --x-btn: #0d67b0;
+  --x-btn-dark: #064f8d;
+  --poster-paper: #fbf4df;
+  --poster-ink: #06478c;
+  --poster-yellow: #ffd95b;
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.95) 0 5%, transparent 15%),
+    radial-gradient(circle at 88% 24%, rgba(255, 255, 255, 0.86) 0 6%, transparent 16%),
+    linear-gradient(180deg, rgba(5, 119, 187, 0.12), rgba(4, 82, 145, 0.35)),
+    linear-gradient(180deg, #147fc5 0%, #85ceef 54%, #0961a1 100%);
+  background-attachment: fixed;
+}
+
+.x-poster-page {
+  position: relative;
+  overflow-x: hidden;
+}
+
+.x-poster-page::before {
+  content: "";
+  position: fixed;
+  inset: auto 0 0;
+  height: 30vh;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.12) 8%, rgba(5, 87, 64, 0.22) 9%, transparent 10%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 2px, transparent 2px 72px),
+    linear-gradient(180deg, transparent 0 42%, rgba(182, 71, 42, 0.78) 43% 68%, rgba(6, 100, 76, 0.72) 69% 100%);
+  opacity: 0.72;
+}
+
+.x-topbar {
+  border-bottom: 1px solid rgba(4, 58, 112, 0.5);
+  background: linear-gradient(180deg, #1787ce 0%, #075aa0 100%);
+  box-shadow: 0 5px 18px rgba(0, 49, 100, 0.2);
+}
+
+.x-topbar-inner {
+  min-height: 54px;
+}
+
+.x-brand,
+.x-home-brand {
+  font-size: 24px;
+  text-shadow: 0 2px 0 rgba(0, 52, 98, 0.24);
+}
+
+.x-topbar-note,
+.x-home-brand-sub,
+.x-home-welcome,
+.x-home-nav a {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.x-main {
+  position: relative;
+  z-index: 1;
+}
+
+.x-poster-hero,
+.x-home-poster-strip {
+  color: #fff;
+  text-align: center;
+  margin: 8px auto 26px;
+  text-shadow: 0 3px 0 rgba(0, 62, 120, 0.22);
+}
+
+.x-poster-hero h1,
+.x-home-poster-strip h1 {
+  margin: 4px 0 12px;
+  font-family: "STKaiti", "KaiTi", "Microsoft YaHei", cursive;
+  font-size: clamp(56px, 11vw, 136px);
+  line-height: 0.95;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.x-poster-kicker,
+.x-home-poster-strip p {
+  margin: 0;
+  font-family: "STKaiti", "KaiTi", cursive;
+  font-size: clamp(18px, 3vw, 30px);
+}
+
+.x-poster-brush,
+.x-home-poster-brush {
+  display: inline-block;
+  padding: 9px 34px 13px;
+  color: #fff;
+  font-family: "STKaiti", "KaiTi", cursive;
+  font-size: clamp(24px, 4vw, 46px);
+  background: #064f8d;
+  box-shadow: 16px 0 0 #064f8d, -16px 0 0 #064f8d;
+  transform: rotate(-1deg);
+}
+
+.x-poster-brush::first-letter,
+.x-home-poster-brush::first-letter {
+  color: var(--poster-yellow);
+}
+
+.x-card,
+.x-home-card,
+.x-auth-card {
+  border: 1px solid rgba(213, 226, 239, 0.95);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 36px rgba(5, 49, 92, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+}
+
+.x-card-header,
+.x-home-section-title {
+  color: #064f8d;
+  border-bottom: 1px solid #d5e3f0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(233, 243, 252, 0.95));
+}
+
+.x-home-section-title {
+  font-size: 14px;
+  padding: 9px 12px;
+}
+
+.x-input {
+  border-radius: 4px;
+  border-color: #a8c4df;
+  background: linear-gradient(180deg, #fff, #f7fbff);
+}
+
+.x-btn {
+  border-radius: 4px;
+  border-color: #064f8d;
+  background: linear-gradient(180deg, #1884cf, #075da8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.x-btn-quiet,
+.x-tab {
+  color: #075da8;
+  border-color: #a8c4df;
+  background: linear-gradient(180deg, #fff, #e8f3fd);
+}
+
+.x-tab-active {
+  color: #064f8d;
+  background: #fff;
+}
+
+.x-layout-2col {
+  align-items: start;
+}
+
+.x-auth-page .x-layout-2col {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+
+.x-paper-note {
+  position: relative;
+  padding: 46px 32px 28px;
+  color: #1c2638;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 30px, rgba(7, 93, 168, 0.22) 31px 32px),
+    linear-gradient(90deg, rgba(7, 93, 168, 0.12) 0 1px, transparent 1px),
+    var(--poster-paper);
+  background-size: auto, 38px 100%, auto;
+  border: 1px solid rgba(164, 139, 92, 0.25);
+  box-shadow: 0 18px 34px rgba(41, 38, 27, 0.25);
+  transform: rotate(-3deg);
+  font-family: "STKaiti", "KaiTi", cursive;
+  font-size: 24px;
+  line-height: 1.45;
+}
+
+.x-paper-pin {
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #7fc5ff, #075da8 70%);
+  box-shadow: 0 4px 10px rgba(0, 49, 100, 0.28);
+}
+
+.x-paper-title {
+  margin: 0 0 8px;
+  color: #1b1b1b;
+  font-size: 28px;
+}
+
+.x-paper-title-blue,
+.x-paper-foot {
+  color: var(--poster-ink);
+}
+
+.x-paper-note ul {
+  margin: 0 0 18px;
+  padding-left: 28px;
+}
+
+.x-paper-note li {
+  margin: 5px 0;
+}
+
+.x-paper-foot {
+  margin-top: 16px;
+  font-size: 22px;
+}
+
+.x-home-main {
+  width: min(1180px, calc(100% - 24px));
+}
+
+.x-home-poster-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  margin-top: 14px;
+  margin-bottom: 24px;
+}
+
+.x-home-poster-strip h1 {
+  font-size: clamp(42px, 8vw, 92px);
+}
+
+.x-home-poster-brush {
+  font-size: clamp(22px, 3.5vw, 36px);
+}
+
+.x-home-layout {
+  grid-template-columns: 260px minmax(0, 1fr) 270px;
+  gap: 14px;
+}
+
+.x-home-avatar {
+  border: 5px solid #fff;
+  border-radius: 4px;
+  background:
+    radial-gradient(circle at 50% 28%, #f7d0b6 0 13%, transparent 14%),
+    radial-gradient(circle at 50% 74%, #1f5f95 0 27%, transparent 28%),
+    linear-gradient(180deg, #ccecff, #5da7da);
+  box-shadow: 0 6px 14px rgba(5, 49, 92, 0.18);
+  color: #064f8d;
+}
+
+.x-home-table {
+  border-color: #d5e3f0;
+}
+
+.x-home-table th {
+  color: #075da8;
+  background: #f5faff;
+}
+
+.x-home-feed li {
+  border-bottom-color: rgba(7, 93, 168, 0.18);
+}
+
+.x-home-thumb-img,
+.x-home-visitor-avatar {
+  border-radius: 4px;
+  border: 3px solid #fff;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(7, 93, 168, 0.18)),
+    linear-gradient(135deg, #bfe8ff, #5aa5d6 48%, #286b42 49%, #7bbd6b);
+  box-shadow: 0 4px 10px rgba(5, 49, 92, 0.16);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 49, 100, 0.45);
+}
+
+.x-home-alert {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+@media (max-width: 980px) {
+  .x-auth-page .x-layout-2col,
+  .x-home-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .x-paper-note {
+    transform: none;
+  }
+}

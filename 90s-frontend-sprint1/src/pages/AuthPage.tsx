@@ -42,17 +42,23 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="x-page">
+    <div className="x-page x-poster-page x-auth-page">
       <header className="x-topbar">
         <div className="x-topbar-inner">
-          <div className="x-brand">校内网 90's Demo</div>
-          <div className="x-topbar-note">欢迎回来，同学</div>
+          <div className="x-brand">90s 校内网</div>
+          <div className="x-topbar-note">致我们逝去的青春和最纯真的网络时代</div>
         </div>
       </header>
 
       <main className="x-main">
+        <section className="x-poster-hero" aria-label="90s 校内网">
+          <p className="x-poster-kicker">不是微信朋友圈，也不是陌陌探探</p>
+          <h1>90s 校内网</h1>
+          <div className="x-poster-brush">让你重新认识陌生人的地方</div>
+        </section>
+
         <div className="x-layout-2col">
-          <section className="x-card">
+          <section className="x-card x-auth-card">
             <div className="x-card-header">账号登录</div>
             <div className="x-card-body">
               <div className="x-tabs">
@@ -115,16 +121,24 @@ export default function AuthPage() {
             </div>
           </section>
 
-          <aside className="x-card">
-            <div className="x-card-header">新鲜事</div>
-            <div className="x-card-body x-muted">
-              <p style={{ marginTop: 0 }}>
-                这是 Sprint 1 的最小认证演示，页面样式参考了早期校内网的蓝白校园风格。
-              </p>
-              <p>你可以先登录，再从主页右侧的推荐同学发起好友申请。</p>
-              <p style={{ marginBottom: 0, fontSize: 12 }}>
-                Demo 提示：refresh token 仅保存在 localStorage。
-              </p>
+          <aside className="x-paper-note x-auth-note">
+            <div className="x-paper-pin" aria-hidden="true" />
+            <div className="x-paper-title">这里没有</div>
+            <ul>
+              <li>短视频刷屏</li>
+              <li>算法推荐</li>
+              <li>颜值速配</li>
+              <li>流量至上</li>
+            </ul>
+            <div className="x-paper-title x-paper-title-blue">这里只有</div>
+            <ul>
+              <li>真实的人</li>
+              <li>真诚的交流</li>
+              <li>慢下来的社交</li>
+              <li>属于我们的青春回忆</li>
+            </ul>
+            <div className="x-paper-foot">
+              校内的我们，简单、真诚、无限可能
             </div>
           </aside>
         </div>

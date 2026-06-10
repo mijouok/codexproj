@@ -175,11 +175,11 @@ export default function MePage() {
   }
 
   return (
-    <div className="x-page">
+    <div className="x-page x-poster-page">
       <header className="x-topbar x-home-topbar">
         <div className="x-topbar-inner x-home-topbar-inner">
           <div className="x-home-brand-wrap">
-            <div className="x-brand x-home-brand">{"\u6821\u5185\u7f51"}</div>
+            <div className="x-brand x-home-brand">{"90s \u6821\u5185\u7f51"}</div>
             <div className="x-home-brand-sub">{"\u9752\u6625\u4e0d\u6563\u573a"}</div>
           </div>
           <nav className="x-home-nav">
@@ -205,6 +205,13 @@ export default function MePage() {
       </header>
 
       <main className="x-main x-home-main">
+        <section className="x-home-poster-strip" aria-label="90s 校内网">
+          <div>
+            <p>{"\u81f4\u6211\u4eec\u901d\u53bb\u7684\u9752\u6625\u548c\u6700\u7eaf\u771f\u7684\u7f51\u7edc\u65f6\u4ee3"}</p>
+            <h1>{"90s \u6821\u5185\u7f51"}</h1>
+          </div>
+          <div className="x-home-poster-brush">{"\u8ba9\u4f60\u91cd\u65b0\u8ba4\u8bc6\u964c\u751f\u4eba\u7684\u5730\u65b9"}</div>
+        </section>
         {homeError && <div className="x-error x-home-alert">{homeError}</div>}
         <div className="x-home-layout">
           <aside className="x-card x-home-card">
