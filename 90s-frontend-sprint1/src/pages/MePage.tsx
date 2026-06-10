@@ -109,10 +109,15 @@ export default function MePage() {
 
   async function sendFriendRequest() {
     if (!home?.userId || friendBusy) return;
+    await sendFriendRequestTo(home.userId);
+  }
+
+  async function sendFriendRequestTo(userId: string) {
+    if (friendBusy) return;
     setFriendBusy(true);
     setFriendError("");
     try {
-      await friendsApi.sendRequest(home.userId, "Hi, let's connect.");
+      await friendsApi.sendRequest(userId, "Hi, let's connect.");
       await refreshHome();
       await refreshFriends();
     } catch (e: any) {
@@ -455,6 +460,9 @@ export default function MePage() {
                         }}>
                           {"\u53bb\u770b\u770b"}
                         </a>
+                        <button className="x-link-button" onClick={() => sendFriendRequestTo(user.userId)} disabled={friendBusy}>
+                          {"\u6dfb\u52a0\u53cb\u53cb"}
+                        </button>
                       </li>
                     ))}
                     {(friendOverview?.suggestions?.length ?? 0) === 0 && <li className="x-muted">{"\u6682\u65e0\u63a8\u8350\u3002"}</li>}

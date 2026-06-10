@@ -31,7 +31,7 @@ public class HomeController {
   }
 
   @GetMapping("/users/{userId}")
-  public HomeResponse getUserHome(@PathVariable String userId) {
+  public HomeResponse getUserHome(@PathVariable("userId") String userId) {
     CurrentUser cu = SecurityUtil.requireCurrentUser();
     return homeService.buildHome(cu.userId(), userId);
   }
@@ -49,7 +49,7 @@ public class HomeController {
   }
 
   @PostMapping("/users/{userId}/messages")
-  public void createUserMessage(@PathVariable String userId, @Valid @RequestBody CreateWallMessageRequest request) {
+  public void createUserMessage(@PathVariable("userId") String userId, @Valid @RequestBody CreateWallMessageRequest request) {
     CurrentUser cu = SecurityUtil.requireCurrentUser();
     homeService.createWallMessage(cu.userId(), userId, request.getContent());
   }
