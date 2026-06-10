@@ -12,10 +12,18 @@ Default service URL: `http://localhost:8080`
 
 Swagger UI: `http://localhost:8080/swagger-ui.html`
 
-## Default Admin
+For local demo data, run with the `dev` profile:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+Production-like runs must provide `JWT_SECRET` with at least 64 bytes.
+
+## Dev Demo Admin
 
 - email: `admin@90s.demo`
-- password: `Admin123!`
+- password: `Admin123!` unless `DEMO_ADMIN_PASSWORD` is set
 
 ## Main APIs
 

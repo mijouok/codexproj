@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -16,17 +17,17 @@ public class JwtService {
 
   public JwtService(JwtProperties props) {
     this.props = props;
-    byte[] keyBytes = props.getSecret().getBytes();
-    this.key = Keys.hmacShaKeyFor(padKey(keyBytes));
-  }
-
-  private byte[] padKey(byte[] raw) {
-    if (raw.length >= 64) return raw;
-    byte[] padded = new byte[64];
-    for (int i = 0; i < padded.length; i++) {
-      padded[i] = raw[i % raw.length];
+    if (props.getIssuer() == null || props.getIssuer().isBlank()) {
+      throw new IllegalStateException("app.jwt.issuer must be configured");
     }
-    return padded;
+    if (props.getSecret() == null || props.getSecret().isBlank()) {
+      throw new IllegalStateException("JWT_SECRET must be configured");
+    }
+    byte[] keyBytes = props.getSecret().getBytes(StandardCharsets.UTF_8);
+    if (keyBytes.length < 64) {
+      throw new IllegalStateException("JWT_SECRET must be at least 64 bytes for HS512");
+    }
+    this.key = Keys.hmacShaKeyFor(keyBytes);
   }
 
   public String createAccessToken(String userId, int trustLevel, List<String> roles) {
@@ -46,6 +47,7 @@ public class JwtService {
   public Map<String, Object> parseClaims(String jwt) {
     return Jwts.parser()
         .verifyWith(key)
+        .requireIssuer(props.getIssuer())
         .build()
         .parseSignedClaims(jwt)
         .getPayload();

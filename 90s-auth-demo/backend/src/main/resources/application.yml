@@ -8,12 +8,17 @@ spring:
       auto-index-creation: true
 
 app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173}
   jwt:
     issuer: "90s-alumni-demo"
     accessTokenMinutes: 15
     refreshTokenDays: 30
-    # IMPORTANT: change this in real deployment
-    secret: "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_AT_LEAST_64_CHARS__________________________"
+    secret: 82e1492e733b90678af310175176cac2e9e639c8c037bc60d7519fa33e0016f5
+  demo-admin:
+    enabled: false
+    email: ${DEMO_ADMIN_EMAIL:admin@90s.demo}
+    password: ${DEMO_ADMIN_PASSWORD:}
 
 logging:
   level:

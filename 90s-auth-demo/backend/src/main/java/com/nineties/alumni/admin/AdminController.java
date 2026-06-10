@@ -5,6 +5,8 @@ import com.nineties.alumni.auth.model.User;
 import com.nineties.alumni.auth.model.UserStatus;
 import com.nineties.alumni.auth.repo.UserRepository;
 import com.nineties.alumni.common.ApiException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +25,10 @@ public class AdminController {
 
   @GetMapping("/users")
   public List<AdminUserResponse> listUsers(@RequestParam(required = false) String query) {
-    // Sprint 1: simple all-users listing. You can replace with search later.
-    return userRepository.findAll().stream()
+    return userRepository.findByStatusNot(
+            UserStatus.BANNED,
+            PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "createdAt"))
+        ).stream()
         .map(AdminUserResponse::from)
         .toList();
   }

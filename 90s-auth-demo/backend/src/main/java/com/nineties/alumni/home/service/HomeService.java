@@ -1,6 +1,7 @@
 package com.nineties.alumni.home.service;
 
 import com.nineties.alumni.auth.model.User;
+import com.nineties.alumni.auth.model.UserStatus;
 import com.nineties.alumni.auth.repo.UserRepository;
 import com.nineties.alumni.common.ApiException;
 import com.nineties.alumni.friend.service.FriendService;
@@ -44,8 +45,8 @@ public class HomeService {
   }
 
   public HomeResponse buildHome(String viewerUserId, String profileUserId) {
-    User profileUser = userRepository.findById(profileUserId)
-        .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
+    requireActiveUser(viewerUserId);
+    User profileUser = requireActiveUser(profileUserId);
 
     boolean owner = viewerUserId.equals(profileUserId);
     if (!owner) {
@@ -115,8 +116,7 @@ public class HomeService {
   }
 
   public void createStatus(String userId, String content) {
-    userRepository.findById(userId)
-        .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
+    requireActiveUser(userId);
 
     HomeStatusPost status = new HomeStatusPost();
     status.setUserId(userId);
@@ -126,10 +126,8 @@ public class HomeService {
   }
 
   public void createWallMessage(String fromUserId, String toUserId, String content) {
-    userRepository.findById(fromUserId)
-        .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
-    userRepository.findById(toUserId)
-        .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
+    requireActiveUser(fromUserId);
+    requireActiveUser(toUserId);
     if (!fromUserId.equals(toUserId)) {
       requireProfileVisible(fromUserId, toUserId);
     }
@@ -146,6 +144,15 @@ public class HomeService {
     if (!friendService.canViewProfile(viewerUserId, profileUserId)) {
       throw new ApiException("PROFILE_NOT_VISIBLE", "Profile is not visible", HttpStatus.FORBIDDEN);
     }
+  }
+
+  private User requireActiveUser(String userId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new ApiException("NOT_FOUND", "User not found", HttpStatus.NOT_FOUND));
+    if (user.getStatus() != UserStatus.ACTIVE) {
+      throw new ApiException("USER_NOT_ACTIVE", "User is not active", HttpStatus.FORBIDDEN);
+    }
+    return user;
   }
 
   private List<HomeResponse.HomeWidget> buildWidgets(String userId, Set<String> peerIds) {

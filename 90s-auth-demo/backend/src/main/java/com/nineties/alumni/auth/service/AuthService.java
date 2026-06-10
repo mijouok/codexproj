@@ -21,9 +21,13 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
 @Service
 public class AuthService {
+  private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+  private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9]{6,20}$");
 
   private final UserRepository userRepository;
   private final RefreshTokenRepository refreshTokenRepository;
@@ -47,12 +51,32 @@ public class AuthService {
     this.roleService = roleService;
   }
 
-private boolean isEmail(String s) {
-  return s != null && s.contains("@");
-}
+  private boolean isEmail(String s) {
+    return s != null && EMAIL_PATTERN.matcher(s).matches();
+  }
+
+  private boolean isPhone(String s) {
+    return s != null && PHONE_PATTERN.matcher(s).matches();
+  }
+
+  private String normalizeIdentifier(String identifier) {
+    String id = identifier == null ? "" : identifier.trim();
+    return id.contains("@") ? id.toLowerCase(Locale.ROOT) : id;
+  }
+
+  private void requireValidIdentifier(String id) {
+    if (!isEmail(id) && !isPhone(id)) {
+      throw new ApiException("INVALID_IDENTIFIER", "Identifier must be a valid email or phone number", HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  private ApiException invalidCredentials() {
+    return new ApiException("INVALID_CREDENTIALS", "Invalid credentials", HttpStatus.UNAUTHORIZED);
+  }
 
   public AuthResponse register(RegisterRequest req) {
-    String id = req.getIdentifier().trim();
+    String id = normalizeIdentifier(req.getIdentifier());
+    requireValidIdentifier(id);
     User u = new User();
     u.setEmail(isEmail(id) ? id : null);
     u.setPhone(!isEmail(id) ? id : null);
@@ -71,17 +95,20 @@ private boolean isEmail(String s) {
   }
 
   public AuthResponse login(LoginRequest req) {
-    User u = null;
-    String id = req.getIdentifier().trim();
+    String id = normalizeIdentifier(req.getIdentifier());
+    if (!isEmail(id) && !isPhone(id)) {
+      throw invalidCredentials();
+    }
+    User u;
     u = isEmail(id)
-      ? userRepository.findByEmail(id).orElseThrow(() -> new ApiException("BAD_REQUEST", "email is required", HttpStatus.BAD_REQUEST))
-      : userRepository.findByPhone(id).orElseThrow(() -> new ApiException("BAD_REQUEST", "phone is required", HttpStatus.BAD_REQUEST));
+      ? userRepository.findByEmail(id).orElseThrow(this::invalidCredentials)
+      : userRepository.findByPhone(id).orElseThrow(this::invalidCredentials);
 
     if (u.getStatus() == UserStatus.BANNED) {
       throw new ApiException("BANNED", "User is banned", HttpStatus.FORBIDDEN);
     }
     if (!passwordEncoder.matches(req.getPassword(), u.getPasswordHash())) {
-      throw new ApiException("INVALID_CREDENTIALS", "Invalid credentials", HttpStatus.UNAUTHORIZED);
+      throw invalidCredentials();
     }
     u.setUpdatedAt(Instant.now());
     u.setLastLoginAt(Instant.now());
@@ -96,6 +123,9 @@ private boolean isEmail(String s) {
         .orElseThrow(() -> new ApiException("INVALID_REFRESH", "Invalid refresh token", HttpStatus.UNAUTHORIZED));
 
     if (!existing.isActive()) {
+      if (existing.getRevokedAt() != null) {
+        revokeActiveRefreshTokens(existing.getUserId());
+      }
       throw new ApiException("INVALID_REFRESH", "Refresh token expired or revoked", HttpStatus.UNAUTHORIZED);
     }
 
@@ -140,6 +170,15 @@ private boolean isEmail(String s) {
     byte[] bytes = new byte[48];
     random.nextBytes(bytes);
     return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+  }
+
+  private void revokeActiveRefreshTokens(String userId) {
+    Instant now = Instant.now();
+    List<RefreshToken> activeTokens = refreshTokenRepository.findByUserIdAndRevokedAtIsNull(userId);
+    for (RefreshToken token : activeTokens) {
+      token.setRevokedAt(now);
+    }
+    refreshTokenRepository.saveAll(activeTokens);
   }
 
 }
